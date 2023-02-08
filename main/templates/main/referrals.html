@@ -1,0 +1,76 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% block content %}
+    <div class="container-fluid">
+        {% include "main/snippets/dashtop.html" with instance=user %}
+        <div class="row">
+            {% include "main/snippets/sidepanel.html" %}
+            <div class="col col col" style="padding:40px;"
+            >
+                <div style="background-color: #DBECF4;
+                    height: 90vh;width:98%;padding: 40px;"
+                >
+                   
+                    <div style="display:flex;flex-direction:row;justify-content:space-between;"> 
+                        <h4 style="font-size: 32px;margin-top: 15px;font-weight: bold;">
+                            My Referrals
+                        </h4>
+                        <a style="text-decoration:none;" href="{% url "main:deposit" %}">
+                            <button  style="background-color:#00befa;height: 40px;
+                                border: 2px solid #00befa;border-radius: 8px;color: white;
+                            ">
+                                Deposit
+                            </button>
+                        </a>
+                        
+                    </div> 
+                    <div class="row" style="margin-top: 22px;padding:20px 50px;">
+                        <div class="col" 
+                            style="background-color:whitesmoke;padding: 20px;">
+                            <h4 style="color:blue;">Direct Referrals</h4>
+                            {% if exist %}
+                                <table style="width:100%; padding:50px 100px;">
+                                    <tr style="height:50px;font-size: 22px;">
+                                        <th >Username</th>
+                                        <th>Status</th>
+                                    </tr>
+                                   
+                                    {% for user in children %}
+                                        <tr>
+                                            <td>{{ user.username }}</td>
+                                            {% if user.paid %}
+                                                <td style="color:green;font-weight: bold;">Account active</td>
+                                            {% else %}
+                                                <td style="color:red;font-weight: bold;">Account inactive</td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                    <hr>
+                                </table>
+                            {% else %}
+                                <h5 style="text-align: center;">No referrals yet </h5>
+                                <h6 style="text-align: center;font-weight: bold;
+                                    margin-top:20px;
+                                ">
+                                    {{ user.ref_link }}</h6>
+                            {% endif %}
+                        </div>
+                        <!--
+                            <div class="col-lg-5 col-md-5 col-sm-5" 
+                            style="background-color:whitesmoke;
+                            margin-left:3px;padding: 20px;
+
+                        ">
+                            <h4 style="color:blue;">Indirect Referrals</h4>
+                          
+                        </div>
+                        -->
+                        
+                    </div>
+                               
+                </div>
+            </div>
+        </div>
+    </div>   
+
+{% endblock %}

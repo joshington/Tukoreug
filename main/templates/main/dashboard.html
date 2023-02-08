@@ -1,0 +1,76 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% block content %}
+    <div class="container-fluid">
+        {% include "main/snippets/dashtop.html" with instance=obj %}
+        <div class="row">
+            {% include "main/snippets/sidepanel.html" with registered=registered %}
+            <div class="col col col" style="padding:40px;
+                padding:30px;
+                background-repeat: no-repeat;
+                background-image: url(../../static/main/images/conc.jpg);
+                background-size: 100% 100%;
+            "
+            >
+                <div style="background-color: #DBECF4;
+                    height: 90vh;width:96%;padding: 40px;"
+                >
+                    <div style="display:flex;flex-direction:row;justify-content:space-between;"> 
+                        <h4 style="font-size: 27px;margin-left: 80px;">
+                            Your   Earnings
+                        </h4>
+                        <div style="display:flex;flex-direction:row;">
+                            <a href="{%  url "main:deposit" %}">
+                                <button  style="background-color:#00ebfa;height: 40px;
+                                    border: 2px solid #00ebfa;border-radius: 8px;color: white;
+                                    font-weight: bold;
+                                ">
+                                    Activate Account
+                                </button>
+                            </a>
+                            
+                            <button  style="background-color:#03045e;height: 40px;
+                                border: 2px solid #03045e;border-radius: 8px;color: white;
+                                margin-left: 15px;
+                            ">
+                                Withdraw Funds
+                            </button>
+                        </div>
+                        
+                    </div>
+                   <h6 style="margin-left:76px;color: blue;margin-top: 8px;font-size: 20px;">
+                        Welcome, {{ obj.username }}</h6>
+                    
+                    <div class="row" style="margin-top: 22px;justify-content: space-evenly;">
+                        <div class="col-lg-4 col-md-4 col-sm-4" 
+                            style="background-color:whitesmoke;height: 150px;margin:6px;padding:20px;">
+                            <h4>Account Balance</h4>
+                            <h2 style="color:blue;">UGX: {{ wallet.balance }}</h2>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-4" 
+                            style="background-color:whitesmoke;height:150px;margin:6px;padding:20px;">
+                            <h4>Referral Earnings</h4>
+                            <h2 style="color:blue;">UGX: {{ wallet.earnings }}</h2>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:10px;justify-content: space-evenly;">
+                        <div class="col-lg-4 col-md-4 col-sm-4" 
+                            style="background-color:whitesmoke;height: 150px;margin:6px;padding:20px;">
+                            <h4>Bonus Earnings</h4>
+                            <h2 style="color:blue;">UGX: {{ wallet.bonus }} </h2>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-4" 
+                            style="background-color:whitesmoke;height:150px;margin:6px;padding:20px;">
+                            <h4>Withdraws</h4>
+                            <h2 style="color:blue;">UGX: {{ wallet.withdraws }} </h2>
+                        </div>
+                    </div>
+                   
+                    <h5 style="padding:20px 50px;">Referral Link: {{ obj.ref_link }}</h5>
+                    
+                </div>
+            </div>
+        </div>
+    </div>   
+
+{% endblock %}

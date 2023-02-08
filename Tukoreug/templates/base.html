@@ -1,0 +1,135 @@
+
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% block title %}Tukoreug - Earn through referrals{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!--font awesome css-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <!--<link rel="stylesheet" type="text/css" href="{% static " shop/css/style.css " %}"> -->
+    <!-- Optional JavaScript -->
+
+    <!--Adding animations into html-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+    esheet" type="text/css">
+
+
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="http://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <!--<script src="{% static 'shop/js/main.js' %}"></script> -->
+</head>
+
+<body>
+    <div>
+        <h5 class="new_header animated infinite bounce delay-2s">welcome to meat2u</h5>
+    </div>
+    {% include 'base/navbar.html' %} {% block content %} {% endblock %}
+    <section>
+        <div class="container-fluid mt-1  required text-white">
+            <div class="row new_row ">
+                <i class="fa fa-truck  fa-4x"></i><b><h6 mx-auto>FREE DELIVERY<br>From 150,000</h6></b>
+                <i class="far fa-money-bill-alt"></i>
+            </div>
+        </div>
+        <div class="container-fluid now_end">
+            <div class="row">
+                <div class="col">
+                    <h5><b>OUR SHOPS</b></h5>
+                    <ul>
+                        <li>Banana</li>
+                        <li>Seeds</li>
+                        <li>Matooke</li>
+                    </ul>
+                </div>
+                <div class="col">
+                    <h5><b>SUPPORT</b></h5>
+                    <ul>
+                        <li>Chat Us</li>
+                        <li>Watsap Us</li>
+                        <li>Contact Us</li>
+                    </ul>
+                </div>
+                <div class="col">
+                    <h5><b>MY ACCOUNT</b></h5>
+                    <ul>
+                        <li>Cart</li>
+                        <li>Checkout</li>
+                        <li>My Account</li>
+                    </ul>
+                </div>
+                <div class="col">
+                    <h5><b>CONTACT US</b></h5>
+                    <p>
+                        <span><i class="fa fa-map-marker">&nbsp;</i>Location: Kampala Opposite..</span>
+                    </p>
+                    <p>
+                        Contact: <b>0706626855</b>
+                    </p>
+                </div>
+            </div>
+    </section>
+</body>
+
+<script>
+    $(document).ready(function() {
+        $('.add').click(function() {
+            if ($(this).prev().val() < 3) {
+                $(this).prev().val(+$(this).prev().val() + 1);
+            }
+        });
+        $('.sub').click(function() {
+            if ($(this).next().val() > 1) {
+                if ($(this).next().val() > 1) $(this).next().val(+$(this).next().val() - 1);
+            }
+        });
+        var productForm = $(".form-product-ajax")
+        productForm.submit(function(event) {
+            event.preventDefault(); //now preventing default submission of form
+            console.log("form is not sending");
+            var thisForm = $(this) //this is the very POST form
+            var actionEndPoint = thisForm.attr("data-endpoint"); //which url to go to...
+            var httpMethod = thisForm.attr("method");
+            var formData = thisForm.serialize();
+
+            $.ajax({
+                url: actionEndPoint,
+                method: httpMethod,
+                data: formData,
+                success: function(data) {
+                    var submitSpan = thisForm.find(".submit-span")
+                    if (data.added) {
+                        submitSpan.html("Added to cart<button type='submit' class='btn btn-link'>Remove?</button>")
+                    } else {
+                        submitSpan.html("<button type='submit' class='btn btn-success'>Add to cart</button>")
+                    }
+                    var navbarCount = $(".navbar-cart-count")
+                    navbarCount.text(data.cartItemCount)
+                    var currentPath = window.location.href
+                    if (currentPath.indexOf("cart") != -1) {
+                        refreshCart()
+                    }
+                },
+                error: function(errorData) {
+                    console.log("error");
+                    console.log(errorData);
+                }
+            })
+        });
+
+        function refreshCart() {
+            console.log
+        }
+    })
+</script>
+
+</html>

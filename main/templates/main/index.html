@@ -1,0 +1,75 @@
+
+{% extends "main/base.html" %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'main/css/style.css' %}">
+{% block content %}
+<section id="top" class="text-center">
+    <div class="container-fluid">
+        <!--title section-->
+        {% include "main/snippets/topbar.html" %}
+        <div class="row">
+            {% include "main/snippets/sidepanel.html" %}
+            <div class="col col col" 
+                style="
+                    padding:30px;
+                    background-image: url({% static "main/images/back.jpeg" %});
+                    height:100vh;width:50vw;
+                "
+            >
+               
+                <!--
+                    <div class="row" style="margin-left:20px; 
+                    margin-top: 20px;" >
+                    <div class="col" style="height:120px;width:70px;background-color:gray;
+                        padding:27px;border-radius: 8px;margin:10px;
+                    ">
+                        <h4 style="color:white;">CREATE ACCOUNT</h4>
+                    </div>
+                    <div class="col" style="height:120px;width:70px;background-color:#8ecae6;
+                        padding:27px;border-radius: 8px;margin:10px;
+                    ">
+                        <h4 style="color:white;font-weight: bold;">LOGIN</h4>
+                    </div>
+                </div>
+                -->
+                <div class="row" style="margin-top:30px;">
+                    <div class="col">
+                        <img src="{% static 'main/images/final.jpeg' %}" 
+                        alt="final" style="
+                            border-radius: 200px; height:400px; 
+                            width:400px;
+                            " 
+                        />
+                    </div>
+                    
+                    <div class="col" style="
+                        padding: 40px;width:200px;"
+                    >
+                        <h2 style="text-align:center;font-size: 50px;color:blue;font-weight: bold;">
+                            Tukoreug</h2>
+                        <div style="margin-top:30px;">
+                            <h3 style="font-weight: bold;">Earn Easily, Earn Quickly</h3>
+                        </div>
+                        <p style="text-align: center;">
+                            Looking for a side hustle, Deposit 20k and earn Millions through Referrals.
+                            All at the comfort of your phone.
+                        </p>
+                        
+                        <h4>How it works</h4>
+                        <button style="background-color:#041562;width:140px;
+                            color:white;
+                            border:2px solid #041562;border-radius: 10px;height:30px;">
+                            <a href="{% url 'main:sign' %}" 
+                                style="text-decoration:none;color: white;">
+                                Get Started
+                            </a>
+                        </button>
+                    </div>
+                </div>        
+            </div>
+           
+        </div>
+    </div>
+    
+</section>
+{% endblock %}

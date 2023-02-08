@@ -1,0 +1,34 @@
+<div class="row" style="background-color:#1E3F66;height: 60px;">
+    <div class="col-lg-3">
+        <h1 class="category wrapper" style="font-size: 26px; font-weight: bold;
+            color: white;
+        ">
+            Tukoreug
+        </h1>
+    </div>
+    <div class="col-lg-9 ">
+        <ul class="nav justify-content-end  text-dark">
+            <li class="nav-item  ">
+                <a class="nav-link active" style="color:white;" href="#">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" style="color:white;" href="#">How it Works</a>
+            </li>
+            <li class="nav-item">
+                <div style="background-color:aqua;
+                    border-radius: 29px;height:40px;width: 90px;">
+                    <a class="nav-link" style="color:white;font-weight: bold;text-align: center;" 
+                        href="{% url 'main:login' %}">
+                        Login
+                    </a>
+                </div>
+                
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" style="color:white;" href="{% url 'main:sign' %}">
+                    SignUp
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>

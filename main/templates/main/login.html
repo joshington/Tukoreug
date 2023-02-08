@@ -1,0 +1,51 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% block content %}
+{% load crispy_forms_tags %}
+    <section>
+        <div class="container-fluid">
+            {% include "main/snippets/topbar.html" %}
+            <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6" style="padding:40px 50px;">
+                    <img src="{% static 'main/images/final.jpeg' %}" 
+                        alt="final" style="height: 60vh;border-radius: 18px;"
+                    />
+                </div>
+                <div class="col" style="padding: 80px 100px;">
+                    <i class="fa fa-lock fa-2x"  aria-hidden="true" style="margin-left:100px;">
+                        Login</i>
+                    <form  method="POST" style="margin-top: 40px;">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                       
+                       
+                       
+                      
+                        <button class="button is-success is-fullwidth  mt-3"
+                            type="submit" style="width:400px;height: 40px;
+                            border:2px solid aqua;font-weight: bold;
+                            font-family: DM Sans,sans-serif;
+                            background-color: aqua;
+                            border-radius:5px;
+                            font-size: 12px;
+                        ">
+                            Login
+                        </button>
+                        <div style="display:flex;
+                            flex-direction:row;
+                            justify-content: space-around;
+                            margin-top: 10px;
+                        ">
+                            <h6>Back</h6>
+                            <a href="{% url 'main:reset' %}" 
+                                style="text-decoration:none;color: black;">
+                                <h6>Forgot Password</h6>
+                            </a>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
