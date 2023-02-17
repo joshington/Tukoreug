@@ -1,4 +1,6 @@
-<div class="row" style="background-color:#1E3F66;height: 60px;">
+{% load staticfiles %}
+
+<div class="row my-nav" style="background-color:#1E3F66;height: 60px;">
     <div class="col-lg-3">
         <h1 class="category wrapper" style="font-size: 26px; font-weight: bold;
             color: white;
@@ -9,7 +11,7 @@
     <div class="col-lg-9 ">
         <ul class="nav justify-content-end  text-dark">
             <li class="nav-item  ">
-                <a class="nav-link active" style="color:white;" href="#">Home</a>
+                <a class="nav-link active" style="color:white;" href="{% url "main:index" %}">Home</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" style="color:white;" href="#">How it Works</a>

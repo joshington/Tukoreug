@@ -43,9 +43,9 @@
                               -->
                               <div>
                                 {% if obj.paid %}
-                                    <button type="button" class="btn btn-primary">
-                                        Account Active
-                                    </button>
+                                  <button type="button" class="btn btn-primary">
+                                    {{ obj.account_type }}    
+                                  </button>
                                 {% else %}
                                     <button type="button" class="btn btn-primary">
                                         Activate Account

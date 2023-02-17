@@ -15,10 +15,12 @@ import random, math, requests
 from django.http import JsonResponse
 from django.urls import reverse
 
+from rave_python import Rave,  Misc, RaveExceptions
+
 from .forms import*
 # Create your views here.
 from .models import*
-
+from .rave import*
 #===just use global variables
 
 #=====initially store the email as yours and modify it through the global scope
@@ -26,7 +28,8 @@ current_email = "bbosalj@gmail.com"
 min_amount = 20000
 
 
-
+#===function to define a list of user with their grandparents incase they have
+child_grands = []
 
 
 @require_http_methods(['GET', 'POST'])
@@ -58,26 +61,66 @@ def payment_response(request):
             if child:
                 #==look for the parent
                 parent = child.parent#now we have the parent 
-                parent_user = parent.user
+                #====fetch the grand parent aswell
+                parent_user = parent.user#this is for the parent 
+                
                 wallet_user = Wallet.objects.get(owner=parent_user)
                 #go ahead and credit the wallet of the parent
-                current_balance = wallet_user.balance
-                earnings = min_amount*0.3
-                wallet_user.balance = current_balance+earnings
-                #now after incrementing the balance, go ahead and increment the earnings aswwell
-                previous_earnings = wallet_user.earnings
-                current_earnings = previous_earnings + earnings
-                wallet_user.earnings = current_earnings
-                wallet_user.save()
-                #after saving wallet of the parent, go ahead aswell and push the rest to the admin.        
+                if user.paid:
+                    current_balance = wallet_user.balance
+                    parent_earnings = min_amount*0.5
+                    wallet_user.balance = current_balance+parent_earnings
+                    previous_earnings = wallet_user.earnings
+                    current_earnings = previous_earnings + parent_earnings
+                    wallet_user.earnings = current_earnings
+                    wallet_user.save()
+                #====child may have a grand father or not so first find out
+
+                    co_earnings = 0;grand_earnings = 0
+                    if child.is_grandchild:
+                        #have to get the actual object
+                        try:
+                            grand_parent = GrandParent.objects.get(grand_child=child)
+                            grand_user = grand_parent.user# this is the grand parent user account
+                            #======now also get the grand user wallet details====
+                            grand_earnings = min_amount*0.2
+                            co_earnings = min_amount*0.3
+
+                            wallet_grand_parent = Wallet.objects.get(owner=grand_user)
+                            grand_current_balance = wallet_grand_parent.balance
+                            #credit the grand parent now
+                            wallet_grand_parent.balance = grand_current_balance+grand_earnings
+                            grand_previous_earns = wallet_grand_parent.earnings
+
+                            current_grand_earns = grand_previous_earns + grand_earnings
+                            wallet_grand_parent.earnings = current_grand_earns
+                            wallet_grand_parent.save()
+
+                        except GrandParent.DoesNotExist:
+                            pass
+                    else:
+                        #now means child has no grandparent so share of the grandparent is taken up by company
+                        admin = Stats.objects.all().first()
+                        admin_balance = admin.balance 
+                        admin_profits = admin.profits
+                
+
+                        co_earnings = min_amount*0.5
+                        admin.balance = admin_balance + co_earnings
+
+                        admin.profits = admin_profits + co_earnings
         except Child.DoesNotExist:
             pass
         messages.success(request, "Deposit was successful")
         return redirect(reverse("main:dash")) #since user is still the same user
-        
     else:
+        user = request.user
+        user_wallet = Wallet.objects.get(owner=user)
         messages.error(request, "Deposit unsuccessful")
-        return redirect(reverse("main:dash"))
+        #return redirect(reverse("main:dash"))
+        return render(request, "main/dashboard.html", {
+            "obj":user, "wallet":user_wallet
+        })
     #return HttpResponse('Finished')
     return redirect(reverse("main:dash"))
 
@@ -115,7 +158,7 @@ def signtrue(request):
         if request.method == 'POST':
             form = RegisterForm(request.POST)
             #====boolean field to mark profile done=====
-            registered = False
+            authed = True;
             if form.is_valid():
                 username = form.cleaned_data.get('username')
                 email = form.cleaned_data.get('email')
@@ -126,7 +169,8 @@ def signtrue(request):
                 user.save()
                 auth_login(request, user)
                 #====go ahead and change the registered variable
-                registered = True#its now ==== True
+                authed = False#its now ==== True
+                
                 print('user created....')
                 messages.success(request, "Registration successful.")
                 #==first get the wallet model=====
@@ -137,15 +181,64 @@ def signtrue(request):
                 return render(request, "main/dashboard.html", {
                     "wallet":user_wallet,
                     "obj":user,
-                    "registered":registered, #since i need to use it in the side panel
+                    "authed":authed, #since i need to use it in the side panel
                     "messages":messages
                 })
             messages.error(request, "Unsuccessful registration. Invalid information")
         form = RegisterForm()
-        registered = False
-        return render(request, "main/profile.html", {"register_form": form, "registered":registered})
+        authed = True
+        return render(request, "main/profile.html", {"register_form": form,"authed":authed})
+
+#====choose package 
+def choose_package(request):
+    user = request.user
+    return render(request, "main/package.html", {"obj":user})
+
+#===code to handle the individual packages
+def handle_silver(request):
+    global min_amount
+    user = request.user
+    if user:
+        user.account_type = "SILVER"
+        min_amount = user.get_deposit
+        return redirect(reverse("main:deposit"))#thi automatically calls the deposit() function
+    return
+    #==go ahead and pass in the deposit amount
+
+#===anyway just go ahead for now with individual funcs
+def handle_gold(request):
+    global min_amount
+    user = request.user
+    if user:
+        user.account_type = "GOLD"
+        min_amount = user.get_deposit
+        return redirect(reverse("main:deposit"))
+    return 
+
+#====now for the platinum bit of it
+def handle_platinum(request):
+    user = request.user
+    if request.method == "POST":
+        global min_amount
+        form = PlatForm(request.POST)
+        if form.is_valid():
+            amount = int(form.cleaned_data['amount'])
+            if amount >= 100000:
+                min_amount = amount
+                user.account_type = "PLATINUM"
+                return redirect(reverse("main:deposit"))
+            else:
+                messages.error(request, "Minimum amount is 100000")
+                form = PlatForm()
+                return render(request,"main/platinum.html", {"form":form, "obj":user})
+        return 
+    form = PlatForm()
+    return render(request,"main/platinum.html", {"form":form, "obj":user})
+        
+    
 
 
+#===function to handle the platinum since user has to add in their amount
 
 def process_payment(name,email):
     auth_token = env('SECRET_KEY')
@@ -189,10 +282,56 @@ def store_details(email,amount):
 def deposit(request):
     username = request.user.username; 
     email = request.user.email
+
     #==to modify the email you have to first specify the global keyname
     global current_email; current_email = email
     return redirect(process_payment(username,email))
     
+
+#======now handling the withdraws===
+def withdraw(request):
+    if request.user.is_authenticated:
+        if request.method == "POST":
+            form = WithdrawForm(request.POST)
+            if form.is_valid():
+                phone = form.cleaned_data['phone']
+                amount = form.cleaned_data['amount']
+                user = request.user
+                #now that u have the user get the earnings of the user so that to withdraw
+                #they can withdraw after 1 month
+                user_wallet = Wallet.objects.get(owner=user)
+                if user_wallet:
+                    earnings = user_wallet.earnings
+                    balance = user_wallet.balance
+                    withdraws = user_wallet.withdraws
+                    if balance > int(amount):
+                        #initially what to withdraw from has to be greater than the maount
+                        try:
+                            res = transfer_money_to_phone(phone,int(amount),user.username)
+                            print(res)
+                            if not res['error']:
+                                #meaning that the error is False, go ahead and update the wallet
+                                new_balance = balance - int(amount)
+                                #earn_current = earnings - int(amount)
+                                withdraw = withdraws + int(amount)
+                            
+                                user_wallet.balance = new_balance
+                                user_wallet.withdraws = withdraw
+                                user_wallet.save()
+                                #wallet_now = Wallet(
+                                ##    balance=new_balance,
+                                #    owner=user,
+                                #    earnings=earn_current,
+                                #    withdraws=withdraw
+                                #)
+                                #wallet_now.save()
+                                return redirect(reverse("main:dash"))
+                        except RaveExceptions.IncompletePaymentDetailsError as e:
+                            return render(request, "main/withdraw.html", {"form":form})
+        form =  WithdrawForm()
+        return render(request, "main/withdraw.html", {"form":form})
+    else:
+        return redirect(reverse("main:login"))
 #=====now getting the myprofile details=======
 def myprofile(request):
     user = request.user
@@ -200,7 +339,9 @@ def myprofile(request):
     try:
         parent = Parent.objects.get(user=user)
         if parent:
-            number = parent.no_children
+            children = Child.objects.filter(parent=parent).count()
+            number = children
+            return render(request, "main/myprofile.html", {'obj':user, "number":number})
     except Parent.DoesNotExist:
         number = 0
     return render(request, "main/myprofile.html", {'obj':user, "number":number})
@@ -262,46 +403,51 @@ def dashboard(request):
     return render(request, "main/dashboard.html", {})
 
 def referrals(request, *args, **kwargs):
-    if request.user.is_authenticated:
-        #since i dont want the user to register every time
-        user = request.user
-        user_wallet = Wallet.objects.select_related().get(owner=user)
-            #now that we have the user model
-        
-        return render(request, "main/dashboard.html", {
-            "obj":user, "wallet":user_wallet
-        })
-    else:
-        if request.method == "POST":
-            form = RegisterForm(request.POST)
-            if form.is_valid():
-                username = form.cleaned_data.get('username')
-                email = form.cleaned_data.get('email')
-                password = form.cleaned_data.get('password')
-                user = User.objects.create_user(
-                    username=username,email=email,password=password
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            email = form.cleaned_data.get('email')
+            password = form.cleaned_data.get('password')
+            user = User.objects.create_user(
+                username=username,email=email,password=password
+            )
+            user.save()
+            #setting the aprent from here
+            code = str(kwargs.get('ref_code'))
+            parent_user = User.objects.get(ref_code=code)
+            if parent_user:
+                parent = Parent(
+                    user=parent_user,
+                    is_parent=True,
                 )
-                user.save()
-                #setting the aprent from here
-                code = str(kwargs.get('ref_code'))
-                parent_user = User.objects.get(ref_code=code)
-                if parent_user:
-                    #set the parent now
-                    #==getting the number of children
-                    parent = Parent(
-                        user=parent_user,
-                        is_parent=True,
-                    )
-                    parent.save()
-                    #also set the current user as achild 
-                    child = Child(
-                        user=user,parent=parent
-                    )
-                    child.save()#have saved the user as a child
-                    #===now increase number of children of parent
-                    parent_children = parent.no_children
-                    parent.no_children = parent_children+1
-                    parent.save()#have saved the number of children
+                #now if this parent also has parent that means we need to honor the grandparent aswell
+                parent.save()
+                #==check if this parent has above a parent 
+                child = Child(
+                    user=user,
+                    parent=parent,
+                    is_child=True
+                )
+                child.save()#have saved the user as a child
+                #check if also this exists in children
+                try:
+                    child_grand = Child.objects.get(user=parent_user)
+                    if child_grand:
+                        child_grand.parent.is_grandparent = True
+                        child_grand.save()
+
+                        child.is_grandchild = True
+                        child.save()
+                        #====go ahead and create the grandparent model 
+                        grandparent = GrandParent(
+                            user=child_grand.parent.user,
+                            child_parent=parent,
+                            grand_child=child
+                        )
+                        grandparent.save()
+                except Child.DoesNotExist:
+                    pass
                 auth_login(request, user)
                 print('user created....')
                 messages.success(request, "Registration successful.")
@@ -314,10 +460,10 @@ def referrals(request, *args, **kwargs):
                     "wallet":user_wallet,
                     "obj":user
                 })
-            messages.error(request, "Unsuccessful registration. Invalid information")
-        form = RegisterForm()
-        #return render(request, "main/profile.html", {"register_form": form})
-        return render(request, "main/profile.html", {"register_form":form})
+        messages.error(request, "Unsuccessful registration. Invalid information")
+    form = RegisterForm()
+    #return render(request, "main/profile.html", {"register_form": form})
+    return render(request, "main/profile.html", {"register_form":form})
 
 
 #===now i want to return the referrals from here
@@ -328,17 +474,20 @@ def get_referrals(request):
     try:
         parent_now = Parent.objects.get(user=user)
         children = [child.user for child in Child.objects.filter(parent=parent_now) ] 
-        
+
+        #==now grand children=====, indirect referrals====
+        grand_children = [k.grand_child.user for k in GrandParent.objects.filter(user=user)]
+        #====the code above is fire i love it
         exist = True
         return render(request, "main/referrals.html", 
-            {"user":user, "children":children,"exist":exist}
+            {"user":user, "children":children,"exist":exist,"grand_children":grand_children}
         )
     except Parent.DoesNotExist:
         children = []
-    
+        grand_children = []
         print(children)
         return render(request, "main/referrals.html",
-             {"user":user, "children":children,"exist":exist}
+             {"user":user, "children":children,"exist":exist,"grand_children":grand_children}
         )
    
     return render(request, "main/referrals.html", {})
@@ -347,3 +496,13 @@ def login(request):
 
 def reset(request):
     return render(request, "main/reset.html", {})
+
+
+#function to handle default 404 and 500 errors
+def error_404(request, exception):
+    data = {}
+    return render(request, "main/error_404.html", data)
+
+def error_500(request):
+    data = {}
+    return render(request, "main/error_500.html", data)

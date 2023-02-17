@@ -26,11 +26,11 @@
                             </h3>
                             <i class="fa fa-lock fa-2x"  aria-hidden="true"></i>
                         </div>
-                        
                     </div>
-                    <div style="align-self:center;margin-left: 80px; justify-items: center;">
+                    <div class="formnow" style="
+                         justify-content: center;padding: 30px 240px;">
                         <form 
-                            method="POST" style="padding: 30px 120px;" enctype="multipart/form-data"
+                            method="POST"  enctype="multipart/form-data"
                         >
                             {% csrf_token %}
                             {{ register_form|crispy }}

@@ -30,7 +30,7 @@ class RegisterForm(ModelForm):
 #==now the login form 
 class LoginForm(ModelForm):
     username = forms.CharField(
-        widget=forms.TextInput(attrs={'placeholder':'Username','style':'width:400px;'}))
+        widget=forms.TextInput(attrs={'placeholder':'Email, e.g tukore@gmail.com','style':'width:400px;'}))
     password=forms.CharField(
         widget=forms.PasswordInput(attrs={'placeholder':'Password', 'style':'width:400px;'}))
     class Meta:
@@ -40,3 +40,22 @@ class LoginForm(ModelForm):
 #===form for payments=====
 class PaymentForm(forms.Form):
     phone = forms.CharField(max_length=10)
+
+class WithdrawForm(forms.Form):
+    phone = forms.CharField(
+        widget=forms.TextInput(
+            attrs={'placeholder':'Phone Number e.g 256706626855','style':'width:300px;'}
+        )
+    )
+    amount = forms.CharField(
+        widget=forms.TextInput(attrs={'placeholder':'Amount e.g 50000','style':'width:300px'})
+    )
+
+class PlatForm(forms.Form):
+    amount = forms.CharField(
+        widget=forms.TextInput(attrs={'placeholder':'Amount e.g 100000 and Above','style':'width:300px'})
+    )
+
+    
+
+    

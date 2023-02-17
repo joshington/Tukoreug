@@ -1,0 +1,70 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% block content %}
+{% load crispy_forms_tags %}
+    <div class="container-fluid">
+        {% include "main/snippets/dashtop.html" with instance=obj %}
+        <div class="row">
+            {% include "main/snippets/sidepanel.html" with registered=registered %}
+            <div class="col col col" style="padding:40px;
+                padding:30px;
+                background-repeat: no-repeat;
+                background-image: url(../../static/main/images/conc.jpg);
+                background-size: 100% 100%;
+            "
+            >
+                <div style="background-color: #90e0ef;
+                    height: 90vh;width:96%;padding: 40px;border-radius: 10px;"
+                >
+                    <div style="display:flex;flex-direction:row;justify-content:space-between;"> 
+                        <h4 style="font-size: 27px;margin-left: 80px;">
+                            Withdraw   Earnings
+                        </h4>
+                        <div style="display:flex;flex-direction:row;">
+                            
+                            
+                            
+                            <button  style="background-color:#03045e;height: 40px;
+                                border: 2px solid #03045e;border-radius: 8px;color: white;
+                                margin-left: 15px;width:100px;
+                            ">
+                                Back
+                            </button>
+                        </div>
+                        
+                    </div> 
+                    <div class="row" style="padding: 100px 80px;">
+                        <div class="col">
+                            <form  method="POST" style="background-color:white;
+                                height: 50vh;border-radius: 10px;padding:60px 30px;">
+                                {% csrf_token %}
+                                {{ form|crispy }}          
+                                <button class="button is-success is-fullwidth  mt-3"
+                                    type="submit" style="width:300px;height: 40px;
+                                    border:2px solid blue;font-weight: bold;
+                                    font-family: DM Sans,sans-serif;
+                                    background-color: blue;margin-top: 30px;
+                                    border-radius:5px;
+                                    font-size: 12px;color: white;
+                                ">
+                                    Withdraw
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col">
+                            <img src="{% static 'main/images/withd.jpg' %}" 
+                                alt="final" style="
+                                    height:50vh; 
+                                    width:100%;
+                                    border-radius: 20px;
+                                " 
+                            />
+                        </div>  
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+      
+
+{% endblock %}

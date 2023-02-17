@@ -1,39 +1,54 @@
-<div class="col-lg-3 col-md-3 col-sm-3" style="background-color:#03045e;
+<div class="col-lg-3 col-md-3 col-sm-3 somecol" style="background-color:#03045e;
     height: 100vh;
 ">
-    <div style="height:60px;margin-top: 5px;padding: 20px;">
-        
+    {% if authed %}
+        <div style="height:60px;margin-top: 5px;">
             <h4 style="color:white;font-weight: bold;">
                 Get Started
             </h4>
-    </div>
+        </div>
+    {% endif %}
+    
+    <hr />
+    <div style="background-color:blue; height:50px;width: 300px;">
+        {% if authed %}
+            <a href="{% url "main:sign" %}">
+                <i class="fa fa-lock fa-1x" style="color:white;padding:2px 30px;" aria-hidden="true">
+                    Create Profile
+                </i>
+            </a>
+        {% else %}
+            <a href="{% url "main:dash" %}">
+                <i class="fa fa-bars fa-1x" style="color:white;padding:2px 30px;">
+                    Dashboard
+                </i>
+            </a>
+        {% endif %}
+    </div> 
+    
     <hr />
     <span>
-        <i class="fa fa-lock fa-1x" style="color:white;padding:2px 30px;">
-            Create Profile
-            <!--<i class="fa fa-chevron-circle-right" 
-                aria-hidden="true" style="color:blue;margin-left: 120px;
-            "></i>-->
-            
-        </i>
-    </span>
-    <hr />
-    <span>
-        <a href="{% url "main:deposit" %}">
+        <a href="{%  url "main:package" %}">
             <i class="fa fa-money fa-1x" style="color:white;padding: 2px 30px;">
-                Deposit</i>
+                Deposit
+            </i>
         </a>
-        
     </span>
     <hr />
     <span>
-        <i class="fa fa-credit-card-alt" aria-hidden="true" style="color:white;padding: 2px 30px;">
-            Withdraw</i>
+        <a href="{% url "main:withdraw" %}">
+            <i class="fa fa-credit-card-alt" aria-hidden="true" style="color:white;padding: 2px 30px;">
+                Withdraw
+            </i>
+        </a>
     </span>
     <hr />
     <span>
-        <i class="fa fa-repeat fa-1x" style="color:white;padding: 2px 30px;">
-            Referrals</i>
+        <a href="{% url "main:myrefs" %}">
+            <i class="fa fa-repeat fa-1x" style="color:white;padding: 2px 30px;">
+                Referrals
+            </i>
+        </a>
     </span>
     <hr />
 </div>

@@ -1,0 +1,56 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% block content %}
+    <div class="container-fluid">
+        {% include "main/snippets/dashtop.html" with instance=obj %}
+        <div class="row">
+            {% include "main/snippets/sidepanel.html" with registered=registered %}
+            <div class="col col col" style="padding:40px;
+                padding:30px;
+                background-repeat: no-repeat;
+                background-image: url(../../static/main/images/conc.jpg);
+                background-size: 100% 100%;
+            "
+            >
+                <div style="background-color: #90e0ef;
+                    height: 90vh;width:96%;padding: 40px;border-radius: 10px;"
+                >
+                    <h4 style="
+                        font-size: 27px;text-align: center;">
+                        Choose Package
+                    </h4> 
+                    <section style="padding:40px 250px;">
+                        <a href="{% url "main:silver" %}" style="text-decoration:none;color: black;">
+                            <div  style="background-color:whitesmoke;
+                                height: 100px;border-radius: 10px;width: 50vh;
+                                text-align: center;padding: 20px 0px;
+                            ">
+                                <h4>Silver</h4>
+                                <h2 style="color:blue;">UGX: 20000</h2>
+                            </div>
+                        </a>
+                        <a href="{% url "main:gold" %}" style="text-decoration:none;color:black;">
+                            <div  style="background-color:whitesmoke;height: 100px;
+                                padding:20px 30px;border-radius: 10px;width: 50vh;
+                                text-align: center;margin-top:15px;
+                            ">
+                                <h4>Gold</h4>
+                                <h2 style="color:blue;">UGX: 50000</h2>
+                            </div>
+                        </a>
+                        <a href="{% url "main:platinum" %}" style="color: black;text-decoration:none;">
+                            <div  style="background-color:whitesmoke;height: 100px;
+                                padding:20px 30px;border-radius: 10px;width: 50vh;
+                                text-align: center;margin-top: 15px;
+                            ">
+                                <h4>Platinum</h4>
+                                <h2 style="color:blue;">100K and above</h2>
+                            </div>
+                        </a>
+                        
+                    </section>  
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

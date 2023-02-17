@@ -19,6 +19,11 @@ urlpatterns = [
     path('logout', views.custom_logout,name="logout"),
     path('reset', views.reset, name="reset"),
     path('deposit', views.deposit, name="deposit"),
-    path('callback', payment_response, name='payment_response')
+    path('dashboard/withdraw', views.withdraw, name="withdraw"),
+    path('callback', payment_response, name='payment_response'),
+    path('dashboard/package', choose_package, name="package"),
+    path('silver',handle_silver, name="silver"),
+    path('gold',handle_gold, name="gold"),
+    path('package/platinum', handle_platinum, name="platinum")
 ]
 

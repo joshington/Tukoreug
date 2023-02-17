@@ -39,7 +39,7 @@
                                         <tr>
                                             <td>{{ user.username }}</td>
                                             {% if user.paid %}
-                                                <td style="color:green;font-weight: bold;">Account active</td>
+                                                <td style="color:green;font-weight: bold;">{{ user.account_type }}</td>
                                             {% else %}
                                                 <td style="color:red;font-weight: bold;">Account inactive</td>
                                             {% endif %}
@@ -48,24 +48,37 @@
                                     <hr>
                                 </table>
                             {% else %}
-                                <h5 style="text-align: center;">No referrals yet </h5>
-                                <h6 style="text-align: center;font-weight: bold;
-                                    margin-top:20px;
-                                ">
-                                    {{ user.ref_link }}</h6>
+                                <h7>No direct referrals yet </h7>
                             {% endif %}
                         </div>
-                        <!--
-                            <div class="col-lg-5 col-md-5 col-sm-5" 
-                            style="background-color:whitesmoke;
-                            margin-left:3px;padding: 20px;
-
-                        ">
+                        <div class="col" 
+                            style="background-color:whitesmoke;padding: 20px;">
                             <h4 style="color:blue;">Indirect Referrals</h4>
-                          
+                            {% if exist %}
+                                <table style="width:100%; padding:50px 100px;">
+                                    <tr style="height:50px;font-size: 22px;">
+                                        <th >Username</th>
+                                        <th>Status</th>
+                                    </tr>
+                                   
+                                    {% for user in grand_children %}
+                                        <tr>
+                                            <td>{{ user.username }}</td>
+                                            {% if user.paid %}
+                                                <td style="color:green;font-weight: bold;">
+                                                    {{ user.account_type }}
+                                                </td>
+                                            {% else %}
+                                                <td style="color:red;font-weight: bold;">Account inactive</td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                    <hr>
+                                </table>
+                            {% else %}
+                                <h7>No Indirect referrals yet </h7>
+                            {% endif %}
                         </div>
-                        -->
-                        
                     </div>
                                
                 </div>
