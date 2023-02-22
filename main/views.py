@@ -11,7 +11,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 
 from django.contrib.auth.decorators import login_required
 
-import random, math, requests
+import random, math, requests,json
 from django.http import JsonResponse
 from django.urls import reverse
 
@@ -311,7 +311,7 @@ def choose_package(request):
     return render(request, "main/package.html", {"obj":user})
 
 
-
+encryption_key="4mMWbCdle3249f2760558ff0c23d03a7fee4764c"
 #===code to handle the individual packages
 #===also u have to give user input to add in the phone
 def handle_input_phone(request):
@@ -322,17 +322,35 @@ def handle_input_phone(request):
         if form.is_valid():
             phone = form.cleaned_data['phone']
             #go ahead with the transaction
-            response = silicon_top(phone,min_amount)
-            if response['status'] == "Successful":
-                show_popup = True#  i think i have to put this in the global scope
-                messages.success(request, "Success, complete transaction")
-                #return render(request, "main/showup.html", {"show":show_popup})
-                #==redirect to the callback
-                return redirect(reverse("main"))
+            #response = silicon_top(phone,min_amount)
+            url = "https://silicon-pay.com/process_payments"
+            payload = {
+                "req":"mobile_money",
+                "currency":"UGX",
+                "phone":format_phone_number(phone),
+                "encryption_key":encryption_key,
+                "amount":int(min_amount),
+                "emailAddress":DEFAULT_ADDRESS,
+                "call_back":"http://tukoreug.com/topup/status",
+                "txRef":str(uuid4())
+            }
+            headers = {
+                'Content-Type':'application/json'
+            }
+            response = requests.post(url, headers=headers,data=payload)
+            #return response.text
+            response = response.text
+            print(response)
+            #if response['status'] == "Successful":
+            #    show_popup = True#  i think i have to put this in the global scope
+            #    messages.success(request, "Success, complete transaction")
+            #    return render(request, "main/showup.html", {"show":show_popup})
+            #    #==redirect to the callback
+            #    return redirect(reverse("main"))
 
-            else:
-                show_popup = False
-                return render(request, "main/showup.html", {"show":show_popup})
+            #else:
+            #    show_popup = False
+            #    return render(request, "main/showup.html", {"show":show_popup})
     form = PaymentForm()
     return render(request,"main/topup.html", {"form":form, "obj":user, "show":show_popup})
 

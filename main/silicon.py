@@ -13,7 +13,7 @@ environ.Env.read_env()
 SECRET_KEY = env('SECRET_KEY')
 PUBLIC_KEY = env('PUBLIC_KEY')
 
-enc_key = env('encryption_key')
+encryption_key="4mMWbCdle3249f2760558ff0c23d03a7fee4764c"
 
 DEFAULT_ADDRESS = 'support@tukoreug.com'
 
@@ -26,10 +26,10 @@ def silicon_top(phone_number,amount):
         "req":"mobile_money",
         "currency":"UGX",
         "phone":format_phone_number(phone_number),
-        "encryption_key":enc_key,
+        "encryption_key":encryption_key,
         "amount":int(amount),
         "emailAddress":DEFAULT_ADDRESS,
-        "call_back":"http://tukore.pythonanywhere.com/topup/status",
+        "call_back":"http://tukoreug.com/topup/status",
         "txRef":str(uuid4())
     })
     headers = {

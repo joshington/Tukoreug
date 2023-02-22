@@ -32,7 +32,7 @@ def format_phone_number(phone_number):
             return phonenumber
     else:
         phonenumber = phone_number
-        return phone_number
+        return phonenumber
 
 #====function to make momo payment===
 def make_momo_payment(amount, phonenumber,user,email=DEFAULT_ADDRESS):
