@@ -30,10 +30,10 @@ class UserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         return user
-    
+
     def create_user(self,username, email, password, **extra_fields):
         return self._create_user(username,email,password,False,False,**extra_fields)
-    
+
     def create_superuser(self,username,email,password, **extra_fields):
         user=self._create_user(username,email, password, True, True, **extra_fields)
         return user
@@ -59,7 +59,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     ref_link = models.URLField()
     account_type = models.CharField(max_length=8, choices=Accounts,default="SILVER")
 
-    
+
     USERNAME_FIELD = 'email'
     EMAIL_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
@@ -71,23 +71,23 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
-    
+
     class Meta:
         unique_together = ("username","email")#username and email should be unique
-    
+
     def save(self, *args, **kwargs):
         if not self.ref_code:
             #go ahead and generate 4 random numbers
             code = generate_ref_code()
             self.ref_code = code
         if not self.ref_link:
-            link = "localhost:8000/referrals/"+str(self.ref_code)
+            link = "http://tukore.pythonanywhere.com/referrals/"+str(self.ref_code)
             self.ref_link = link
         super().save()
 
 
     #===define a decorator here to return the deposit amount baing on the package
-    @property 
+    @property
     def get_deposit(self):
         deposit = 0
         if self.account_type == "SILVER":
@@ -97,7 +97,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             deposit >= 100000 #hoping this code works, but i think it does
         return deposit
 
-    
+
 
 
 #=====now we need to create the parent models and child models======
@@ -116,13 +116,13 @@ class Parent(models.Model):
         if self.is_parent:
             children = self.no_children
             children += 1
-    
+
     @property
     def get_no_grandchildren(self):
         if self.is_grandparent:
             grandchildren = self.no_grand_children
             grandchildren += 1
-    
+
     #getting the grand children
     @property
     def get_grandchildren(self):
@@ -146,10 +146,10 @@ class Child(models.Model):
     #===function to check if the child has a grand parent or not
     @property
     def has_grand_parent(self):
-        if self.is_grandchild:return True 
+        if self.is_grandchild:return True
         else:return False
 
-#====man i cant rule out that i need the grand parent 
+#====man i cant rule out that i need the grand parent
 class GrandParent(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True,default='user1')
     child_parent = models.ForeignKey(Parent, on_delete=models.PROTECT,default='parent1')
@@ -157,7 +157,7 @@ class GrandParent(models.Model):
 
     def __str__(self):
         return self.user.username
-    
+
 
 #===initially the payments model
 class Payment(models.Model):
@@ -181,7 +181,7 @@ class Payment(models.Model):
     def __str__(self) -> str:
         return str(self.id)
 
-#====now working on the 
+#====now working on the
 class Wallet(models.Model):
     id=models.UUIDField(primary_key=True, default=uuid.uuid4,editable=False)
     balance=models.PositiveIntegerField(default=0)
@@ -202,7 +202,7 @@ class Stats(models.Model):
     nousers = models.IntegerField(default=0)
     no_active_users = models.IntegerField(default=0)
     profits = models.PositiveIntegerField(default=0)
-    
+
     def __str__(self):
         return str(self.deposits)
 
@@ -233,19 +233,6 @@ def create_wallet(sender,instance, created, **kwargs):
             )
             wallet.save()
             print("saving wallet... now")
-            if Stats.objects.all().count() < 1:
-                stats = Stats(
-                    balance=0,
-                    deposits = 0,
-                    widthdraws = 0,
-                    nousers = 0,
-                    no_active_users = 0,
-                    profits = 0
-                )
-                stats.save()#saving the Stats model 
-            elif Stats.objects.all().count() > 1:
-                pass #dont do anything
-            else:pass
         except IntegrityError as e:
             raise e
 

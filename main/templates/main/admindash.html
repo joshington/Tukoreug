@@ -1,0 +1,70 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+
+{% block content %}
+    <section>
+        {% include "main/snippets/admintop.html"  %}
+        <div class="row">
+            <div class="col col col"
+                style="
+                    padding:40px;
+                    padding:30px;
+                    background-repeat: no-repeat;
+                    background-image: url(../../static/main/images/conc.jpg);
+                    background-size: 100% 100%;
+                "
+            >
+                <div  style="background-color: #90e0ef;padding: 30px 50px;">
+                    <input type="checkbox" class="toggle-menu">
+                    <div class="hamburger"></div>
+                    <div style="display:flex;flex-direction:row;justify-content:space-between;">
+                        <h4 style="font-size: 27px;margin-left: 80px;">
+                            Admin   Earnings
+                        </h4>
+                        <div  class="nowearn"  style="display:flex;flex-direction:row;">
+                            <!--  Add the modal from here=====-->
+                            <a href="{% url "main:withdraw" %}">
+                                <button  style="background-color:#03045e;height: 40px;
+                                    border: 2px solid #03045e;border-radius: 8px;color: white;
+                                    margin-left: 15px;
+                                ">
+                                    Withdraw Funds
+                                </button>
+                            </a>
+                        </div>
+
+                    </div>
+                    <div class="row" style="margin-top: 22px;justify-content: space-evenly;">
+                        <div class="col-lg-4 col-md-4 col-sm-4"
+                            style="background-color:whitesmoke;height: 150px;
+                            margin:6px;padding:20px;border-radius: 10px;">
+                            <h4>Account Balance</h4>
+                            <h2 style="color:blue;">UGX: {{ balance }}</h2>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-4"
+                            style="background-color:whitesmoke;
+                                height:150px;margin:6px;padding:20px;border-radius: 10px;">
+                            <h4>Total Withdraws</h4>
+                            <h2 style="color:blue;">UGX: {{ withdraws }}</h2>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:10px;justify-content: space-evenly;">
+                        <div class="col-lg-4 col-md-4 col-sm-4"
+                            style="background-color:whitesmoke;
+                                height: 150px;margin:6px;padding:20px;border-radius: 10px;">
+                            <h4>Total Deposits</h4>
+                            <h2 style="color:blue;">UGX: {{ deposits }} </h2>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-4"
+                            style="background-color:whitesmoke;
+                                height:150px;margin:6px;padding:20px;border-radius: 10px;">
+                            <h4>Total Users</h4>
+                            <h2 style="color:blue;">{{ nousers }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

@@ -3,11 +3,12 @@
 {% block content %}
 {% load crispy_forms_tags %}
     <section>
+        {% include "main/snippets/topbar.html" %}
         <div class="container-fluid">
-            {% include "main/snippets/topbar.html" %}
+
             <div class="row loga">
-                <div class="col-lg-6 col-md-6 col-sm-6" style="padding:40px 50px;">
-                    <img src="{% static 'main/images/final.jpeg' %}" 
+                <div class="col-lg-6 col-md-6 col-sm-6  col_img" style="padding:40px 50px;">
+                    <img src="{% static 'main/images/final.jpeg' %}"
                         alt="final" style="height: 60vh;border-radius: 18px;"
                     />
                 </div>
@@ -17,7 +18,7 @@
                     <form  method="POST" style="margin-top: 40px;">
                         {% csrf_token %}
                         {{ form|crispy }}
-                       
+
                         <button class="button is-success is-fullwidth  mt-3"
                             type="submit" style="width:400px;height: 40px;
                             border:2px solid aqua;font-weight: bold;
@@ -28,19 +29,21 @@
                         ">
                             Login
                         </button>
-                        <div style="display:flex;
-                            flex-direction:row;
-                            justify-content: space-evenly;
-                            margin-top: 10px;
-                        ">
-                            <h6>Back</h6>
-                            <a href="{% url 'main:reset' %}" 
-                                style="text-decoration:none;color: black;">
-                                <h6>Forgot Password</h6>
-                            </a>
-                        </div>
-
                     </form>
+                    <!--
+                         <div style="display:flex;
+                        flex-direction:row;
+                        justify-content: space-evenly;
+                        margin-top: 10px;
+                    ">
+                        <h6>Back</h6>
+                        <a href="{% url 'main:reset' %}"
+                            style="text-decoration:none;color: black;">
+                            <h6>Forgot Password</h6>
+                        </a>
+                    </div>
+                    -->
+
                 </div>
             </div>
         </div>

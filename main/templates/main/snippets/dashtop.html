@@ -1,49 +1,45 @@
 
-<div class="row" style="background-color:#1E3F66;height: 52px;">
-    <div class="col-lg-2">
-        <h1 class="category wrapper" style="font-size: 26px; font-weight: bold;
-            color: white;
-        ">
-            Tukoreug
-        </h1>
-    </div>
-    <div class="col ">
-        <ul class="nav justify-content-end ">
-            <li class="nav-item">
-                <a class="nav-link" style="color:white;" href="{% url  'main:myrefs' %}">
-                    <button  style="background-color:#03045e;height: 40px;
-                        border: 2px solid #03045e;border-radius: 8px;color: white;">
+{% load staticfiles %}
+{% load static %}
+
+<header>
+    <div class="header">
+        <div class="logo">
+             <a href="#">
+                <h4>Tukoreug</h4>
+             </a>
+        </div>
+        <div class="navigation">
+            <input type="checkbox" class="toggle-menu">
+            <div class="hamburger"></div>
+            <ul class="menu">
+                <li>
+                    <a href="{% url  'main:myrefs' %}">
                         My Referrals
-                    </button>
-                </a>
-            </li>
-            <li class="nav-item" style="margin-top: 10px;">
-                <a href="{% url "main:myprofile" %}" style="text-decoration:none; color: white;">
-                    <div">
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url "main:myprofile" %}">
                         <span style="font-size: 10px;">
                             <i class="fa fa-user fa-2x">
                                 {{ instance.username }}
                             </i>
                         </span>
                        <span>
-                            <i class="fa fa-chevron-down" 
+                            <i class="fa fa-chevron-down"
                                 style="margin-top: 8px;color:white;">
                             </i>
                        </span>
-                       
-                    </div> 
-                </a>
-            </li>
-            <li class="nav-item" style="background-color:aqua;">
-                   <!--<i class="fa-solid fa-gift"></i>-->
-                <a class="nav-link" style="color:white;" href="#">
-                    <div style="display:flex;flex-direction:row;">
-                        <i class="fa fa-gift fa-2x"></i>
-                        <h6 style="margin:10px;font-weight:bold;color: black;">INVITE & EARN</h6>
-                    </div>
-                        
-                </a> 
-            </li>
-        </ul>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'main:sign' %}">
+                       <i class="fa fa-gift fa-1x">INVITE & EARN</i>
+                    </a>
+                </li>
+            </ul>
+        </div>
     </div>
-</div>
+</header>
+
+

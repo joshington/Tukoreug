@@ -12,6 +12,7 @@ urlpatterns = [
     path('sign', views.signtrue, name="sign"),
     #url(r'^dashboard/(?P<id>\d+)/$', views.dashboard, name='dash'),
     path('dashboard', views.dashboard, name="dash"),
+    path('user/admin', views.get_admin, name="get_admin"),
     path('dashboard/myprofile', views.myprofile, name="myprofile"),
     path('dashboard/referrals', views.get_referrals, name="myrefs"),
     path('referrals/<str:ref_code>', views.referrals, name="refs"),
@@ -20,10 +21,12 @@ urlpatterns = [
     path('reset', views.reset, name="reset"),
     path('deposit', views.deposit, name="deposit"),
     path('dashboard/withdraw', views.withdraw, name="withdraw"),
-    path('callback', payment_response, name='payment_response'),
+    #path('callback', payment_response, name='payment_response'),
+    path('topup/status', handle_callback, name='payment_response'),
     path('dashboard/package', choose_package, name="package"),
     path('silver',handle_silver, name="silver"),
     path('gold',handle_gold, name="gold"),
-    path('package/platinum', handle_platinum, name="platinum")
+    path('package/platinum', handle_platinum, name="platinum"),
+    path('package/topup',  handle_input_phone, name="handle_input"),
 ]
 

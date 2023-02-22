@@ -1,23 +1,30 @@
+
 {% extends "main/base.html" %}
 {% load static %}
+
+
 {% block content %}
-    <div class="container-fluid">
+    <section>
         {% include "main/snippets/dashtop.html" with instance=obj %}
         <div class="row">
             {% include "main/snippets/sidepanel.html" with registered=registered %}
-            <div class="col col col" style="padding:40px;
-                padding:30px;
-                background-repeat: no-repeat;
-                background-image: url(../../static/main/images/conc.jpg);
-                background-size: 100% 100%;
-            "
+            <div class="col col col"
+                style="
+                    padding:40px;
+                    padding:30px;
+                    background-repeat: no-repeat;
+                    background-image: url(../../static/main/images/conc.jpg);
+                    background-size: 100% 100%;
+                "
             >
-                <div style="background-color: #90e0ef;padding: 30px 50px;">
-                    <div style="display:flex;flex-direction:row;justify-content:space-between;"> 
+                <div  style="background-color: #90e0ef;padding: 30px 50px;">
+                    <input type="checkbox" class="toggle-menu">
+                    <div class="hamburger"></div>
+                    <div style="display:flex;flex-direction:row;justify-content:space-between;">
                         <h4 style="font-size: 27px;margin-left: 80px;">
                             Your   Earnings
                         </h4>
-                        <div style="display:flex;flex-direction:row;">
+                        <div  class="nowearn"  style="display:flex;flex-direction:row;">
                             {% if obj.paid %}
                                 <a href="{%  url "main:package" %}">
                                     <button  style="background-color:green;height: 40px;
@@ -46,23 +53,21 @@
                                     Withdraw Funds
                                 </button>
                             </a>
-                            
-                           
                         </div>
-                        
+
                     </div>
-                   <h4 style="margin-left:76px;color:green;font-weight: 
+                   <h4 style="margin-left:76px;color:green;font-weight:
                         bold;margin-top: 8px;font-family: cursive;">
                         Welcome, {{ obj.username }}</h4>
-                    
+
                     <div class="row" style="margin-top: 22px;justify-content: space-evenly;">
-                        <div class="col-lg-4 col-md-4 col-sm-4" 
+                        <div class="col-lg-4 col-md-4 col-sm-4"
                             style="background-color:whitesmoke;height: 150px;
                             margin:6px;padding:20px;border-radius: 10px;">
                             <h4>Account Balance</h4>
                             <h2 style="color:blue;">UGX: {{ wallet.balance }}</h2>
                         </div>
-                        <div class="col-lg-4 col-md-4 col-sm-4" 
+                        <div class="col-lg-4 col-md-4 col-sm-4"
                             style="background-color:whitesmoke;
                                 height:150px;margin:6px;padding:20px;border-radius: 10px;">
                             <h4>Referral Earnings</h4>
@@ -70,13 +75,13 @@
                         </div>
                     </div>
                     <div class="row" style="margin-top:10px;justify-content: space-evenly;">
-                        <div class="col-lg-4 col-md-4 col-sm-4" 
+                        <div class="col-lg-4 col-md-4 col-sm-4"
                             style="background-color:whitesmoke;
                                 height: 150px;margin:6px;padding:20px;border-radius: 10px;">
                             <h4>Bonus Earnings</h4>
                             <h2 style="color:blue;">UGX: {{ wallet.bonus }} </h2>
                         </div>
-                        <div class="col-lg-4 col-md-4 col-sm-4" 
+                        <div class="col-lg-4 col-md-4 col-sm-4"
                             style="background-color:whitesmoke;
                                 height:150px;margin:6px;padding:20px;border-radius: 10px;">
                             <h4>Withdraws</h4>
@@ -86,14 +91,10 @@
                     <div style="display:flex;
                         justify-content: space-around;padding:  7px 2px;">
                         <h3>Referral Link:</h3>
-                        <!--
-                            <h5 id="link" value=""   style="color:green;font-weight:bold;">{{ obj.ref_link }}</h5>
-                        -->
-                    
-                        <input type="text" value="{{ obj.ref_link }}" id="link" style="width:30%;">
+                        <input type="text" value="{{ obj.ref_link }}" id="link" style="width:50%;">
                     </div>
 
-                    <button onclick="myFunction()" 
+                    <button onclick="myFunction()"
                         style="background-color:green;margin-left: 90px;
                                 border: 2px solid green;border-radius: 5px;color: white;"
                     >
@@ -102,7 +103,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </section>
     <script>
         function myFunction() {
             // Get the text field
@@ -118,6 +119,6 @@
             // Alert the copied text
             alert("Copied the link: " + copyText.value);
         }
-    </script>   
+    </script>
 
 {% endblock %}

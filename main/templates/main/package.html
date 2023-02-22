@@ -1,7 +1,7 @@
 {% extends "main/base.html" %}
 {% load static %}
 {% block content %}
-    <div class="container-fluid">
+    <section>
         {% include "main/snippets/dashtop.html" with instance=obj %}
         <div class="row">
             {% include "main/snippets/sidepanel.html" with registered=registered %}
@@ -18,7 +18,7 @@
                     <h4 style="
                         font-size: 27px;text-align: center;">
                         Choose Package
-                    </h4> 
+                    </h4>
                     <section style="padding:40px 250px;">
                         <a href="{% url "main:silver" %}" style="text-decoration:none;color: black;">
                             <div  style="background-color:whitesmoke;
@@ -47,10 +47,10 @@
                                 <h2 style="color:blue;">100K and above</h2>
                             </div>
                         </a>
-                        
-                    </section>  
+
+                    </section>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 {% endblock %}

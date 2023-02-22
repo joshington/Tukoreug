@@ -28,7 +28,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '51*a0xj61@2-t7f-(tzjg+8qhk3%8fxg!^znbgw*42aw_8=oyb'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'crispy_forms',
     'main',
-    
+
 ]
 
 MIDDLEWARE = [
@@ -146,6 +146,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static/'),
 ]
 
+STATIC_ROOT = '/home/tukore/Tukoreug/static'
 
 CACHES = {
     'default':{

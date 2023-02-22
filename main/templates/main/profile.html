@@ -3,8 +3,9 @@
 {% block content %}
 {% load crispy_forms_tags %}
     <section>
-        <div class="container-fluid">
-            {% include "main/snippets/topbar.html" %}
+        {% include "main/snippets/topbar.html" %}
+
+
             <div class="row">
                 {% include "main/snippets/sidepanel.html" %}
                 <div class="col col col colbg"
@@ -20,36 +21,35 @@
                             <i class="fa fa-arrow-left" aria-hidden="true"></i>
                             <h3 style="
                                 font-weight: bold;font-family: Times New Roman, Times, serif;
-                                
+
                             ">
                                 Create a Secure Profile
                             </h3>
                             <i class="fa fa-lock fa-2x"  aria-hidden="true"></i>
                         </div>
                     </div>
-                    <div class="formnow" style="
-                         justify-content: center;padding: 30px 240px;">
-                        <form 
+                    <div class="formnow" style="justify-content: center;">
+                        <form
                             method="POST"  enctype="multipart/form-data"
                         >
                             {% csrf_token %}
                             {{ register_form|crispy }}
                             <!--
-                                <input id="email" type="email" 
-                                name="email" placeholder="Email" 
+                                <input id="email" type="email"
+                                name="email" placeholder="Email"
                                 style="height:40px;width: 400px;
                                     margin-top: 20px;
                                 "
                             >
                             <br />
-                            <input id="password" type="password" 
-                                name="password" placeholder="Password" 
+                            <input id="password" type="password"
+                                name="password" placeholder="Password"
                                 style="height:40px;width: 400px;
                                     margin-top: 20px;
                                 "
                             >
                             <br />
-                            
+
                         -->
                             <button class="button is-success is-fullwidth  mt-3"
                                     type="submit" style="width:400px;height: 40px;
@@ -74,19 +74,18 @@
                                 </ul>
                             {% endif %}
                             -->
-                           
+
                             <a href="#" style="text-decoration:none;color:blue;">
                                 <p style="text-align:center;width:400px;margin-top: 40px;font-size: 12px;">
                                     By creating profile, you agree to the TukoreUg Terms of Use,
                                         Privacy Policy, Client Agreement
-                                    
+
                                 </p>
                             </a>
-                            
+
                         </form>
                     </div>
                 </div>
             </div
-        </div>
     </section>
 {% endblock %}

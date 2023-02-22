@@ -1,0 +1,43 @@
+
+* body {
+    margin-left:1px;
+}
+
+
+@media (max-width: 480px){
+    .nowro{
+        display: block;
+    }
+    .banner {
+        width: 50%;
+    }
+    
+    .textn {
+        font-size: 15px;
+        font-weight: bold;
+    }
+    .newrow {
+        margin-top: 30px;
+    }
+    .somecol {
+        height: 30vh;
+    }
+    .formnow {
+        padding: 0px 0px;
+        align-content: center;
+    }
+    .loga {
+        display: block;
+    }
+    cola {
+        padding:10px 10px;
+    }
+}
+/*
+    320px — 480px: Mobile devices
+    481px — 768px: iPads, Tablets
+    769px — 1024px: Small screens, laptops
+    1025px — 1200px: Desktops, large screens
+    1201px and more —  Extra large screens, TV
+
+*/
