@@ -1,0 +1,83 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block content %}
+    <section>
+        {% include "main/snippets/admintop.html"  %}
+
+
+                <div class="table_col">
+                    <div class="foc_div">
+                        <h4>All Users</h4>
+                        <h5>Showing results: {{ page_num  }} of {{ num_pages }} </h5>
+                    </div>
+                    {% for msg  in messages %}
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert"  data-closable>
+                            <strong>{{ msg }}</strong>
+                            <button class="close-button" aria-label="Close alert" type="button" data-close>
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                    {% if page_obj  %}
+                        <table class="content-table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+
+                            {% for user in page_obj %}
+                                <tbody>
+                                    <tr>
+                                        <td>{{ user.username }}</td>
+                                        <td>{{ user.email }}</td>
+
+                                        {% if user.paid %}
+                                            <td>active</td>
+                                        {% else %}
+                                            <td>Inactive</td>
+                                        {% endif %}
+                                        {% if user.is_blocked %}
+                                            <td class="block_user">
+                                                <a href="{% url 'main:unblock' id=user.id %}">
+                                                   Un block
+                                                </a>
+                                            </td>
+                                        {% else %}
+                                            <td class="block_user">
+                                                <a href="{% url 'main:block' id=user.id %}">
+                                                    block
+                                                </a>
+                                            </td>
+                                        {% endif %}
+                                    </tr>
+                                </tbody>
+                            {% endfor %}
+                        </table>
+                        <div class="bobu">
+                            <span class="first">
+                                {% if page_obj.has_previous  %}
+                                    <a href="{% url 'main:all_users' %}?page={{ page_obj.previous_page_number }}">Previous Page</a>
+                                {% endif %}
+                            </span>
+                            <span class="another">
+                                {% if page_obj.has_next %}
+                                    <a href="{% url 'main:all_users' %}?page={{ page_obj.next_page_number }}">Next Page</a>
+                                {% endif %}
+                            </span>
+                        </div>
+
+                    {% else %}
+                        <h5 style="text-align:center;">No users found </h5>
+                    {% endif %}
+                </div>
+
+
+    </section>
+
+{% endblock %}

@@ -6,35 +6,24 @@
 {% block content %}
     <section>
         {% include "main/snippets/dashtop.html" with instance=obj %}
-        <div class="row">
+        <div style="display:flex;flex-direction:row;">
             {% include "main/snippets/sidepanel.html" with registered=registered %}
-            <div class="col col col"
-                style="
-                    padding:40px;
-                    padding:30px;
-                    background-repeat: no-repeat;
-                    background-image: url(../../static/main/images/conc.jpg);
-                    background-size: 100% 100%;
-                "
-            >
-                <div  style="background-color: #90e0ef;padding: 30px 50px;">
-                    <input type="checkbox" class="toggle-menu">
-                    <div class="hamburger"></div>
-                    <div style="display:flex;flex-direction:row;justify-content:space-between;">
-                        <h4 style="font-size: 27px;margin-left: 80px;">
+            <div class="mano">
+                <div  class="testdash">
+                    {% for msg  in messages %}
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert"  data-closable>
+                            <strong>{{ msg }}</strong>
+                            <button class="close-button" data-bs-dismiss="alert" aria-label="Close alert" type="button" data-close>
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                    <div class="dashrow">
+                        <h4>
                             Your   Earnings
                         </h4>
                         <div  class="nowearn"  style="display:flex;flex-direction:row;">
-                            {% if obj.paid %}
-                                <a href="{%  url "main:package" %}">
-                                    <button  style="background-color:green;height: 40px;
-                                        border: 2px solid green;border-radius: 8px;color: white;
-                                        font-weight: bold;
-                                    ">
-                                        Deposit
-                                    </button>
-                                </a>
-                            {% else %}
+                            {% if not obj.paid %}
                                 <a href="{%  url "main:package" %}">
                                     <button  style="background-color:green;height: 40px;
                                         border: 2px solid green;border-radius: 8px;color: white;
@@ -46,58 +35,43 @@
                             {% endif %}
                             <!--  Add the modal from here=====-->
                             <a href="{% url "main:withdraw" %}">
-                                <button  style="background-color:#03045e;height: 40px;
-                                    border: 2px solid #03045e;border-radius: 8px;color: white;
-                                    margin-left: 15px;
-                                ">
-                                    Withdraw Funds
+                                <button class="mine_with">
+                                    Withdraw
                                 </button>
                             </a>
                         </div>
-
                     </div>
-                   <h4 style="margin-left:76px;color:green;font-weight:
+                    <h4 class="weltext" style="color:green;font-weight:
                         bold;margin-top: 8px;font-family: cursive;">
-                        Welcome, {{ obj.username }}</h4>
+                        Welcome, {{ obj.username }}
+                    </h4>
 
-                    <div class="row" style="margin-top: 22px;justify-content: space-evenly;">
-                        <div class="col-lg-4 col-md-4 col-sm-4"
-                            style="background-color:whitesmoke;height: 150px;
-                            margin:6px;padding:20px;border-radius: 10px;">
+                    <div class="dodo">
+                        <div class="dodo_col"
                             <h4>Account Balance</h4>
                             <h2 style="color:blue;">UGX: {{ wallet.balance }}</h2>
                         </div>
-                        <div class="col-lg-4 col-md-4 col-sm-4"
-                            style="background-color:whitesmoke;
-                                height:150px;margin:6px;padding:20px;border-radius: 10px;">
+                        <div class="dodo_col"
                             <h4>Referral Earnings</h4>
                             <h2 style="color:blue;">UGX: {{ wallet.earnings }}</h2>
                         </div>
                     </div>
-                    <div class="row" style="margin-top:10px;justify-content: space-evenly;">
-                        <div class="col-lg-4 col-md-4 col-sm-4"
-                            style="background-color:whitesmoke;
-                                height: 150px;margin:6px;padding:20px;border-radius: 10px;">
+                    <div class="dodo">
+                        <div class="dodo_col"
                             <h4>Bonus Earnings</h4>
                             <h2 style="color:blue;">UGX: {{ wallet.bonus }} </h2>
                         </div>
-                        <div class="col-lg-4 col-md-4 col-sm-4"
-                            style="background-color:whitesmoke;
-                                height:150px;margin:6px;padding:20px;border-radius: 10px;">
+                        <div class="dodo_col"
                             <h4>Withdraws</h4>
                             <h2 style="color:blue;">UGX: {{ wallet.withdraws }} </h2>
                         </div>
                     </div>
-                    <div style="display:flex;
-                        justify-content: space-around;padding:  7px 2px;">
+                    <div class="refer">
                         <h3>Referral Link:</h3>
-                        <input type="text" value="{{ obj.ref_link }}" id="link" style="width:50%;">
-                    </div>
 
-                    <button onclick="myFunction()"
-                        style="background-color:green;margin-left: 90px;
-                                border: 2px solid green;border-radius: 5px;color: white;"
-                    >
+                        <input   type="text" value="{{ obj.ref_link }}" id="link">
+                    </div>
+                    <button  class="cop" onclick="myFunction()">
                         Copy link
                     </button>
                 </div>

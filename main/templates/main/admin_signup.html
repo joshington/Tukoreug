@@ -13,21 +13,12 @@
                     />
                 </div>
                 <div class="col cola" style="margin-top:40px;">
-                    {% for msg  in messages %}
-                        <div class="callout success">
-                            <button class="close-button" aria-label="Close alert" type="button">
-                                <span aria-hidden="true">×</span>
-                            </button>
-                            <p>
-                                <strong>{{ msg }}</strong>
-                            </p>
-                        </div>
-                    {% endfor %}
                     <i class="fa fa-lock fa-2x"  aria-hidden="true" style="margin-left:100px;">
-                        Login</i>
+                        Admin   SignUp
+                    </i>
                     <form  method="POST" style="margin-top: 40px;">
                         {% csrf_token %}
-                        {{ form|crispy }}
+                        {{ register_form|crispy }}
 
                         <button class="button is-success is-fullwidth  mt-3"
                             type="submit" style="width:400px;height: 40px;
@@ -37,7 +28,7 @@
                             border-radius:5px;
                             font-size: 12px;
                         ">
-                            Login
+                            Signup
                         </button>
                     </form>
                     <!--

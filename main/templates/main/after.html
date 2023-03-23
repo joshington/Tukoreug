@@ -1,0 +1,43 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+
+{% block content %}
+    <section>
+        {% include "main/snippets/dashtop.html" with instance=obj %}
+        <div class="row">
+            {% include "main/snippets/sidepanel.html" with registered=registered %}
+            <div class="col col col"
+                style="
+                    padding:40px;
+                    padding:30px;
+                    background-repeat: no-repeat;
+                    background-image: url(../../static/main/images/conc.jpg);
+                    background-size: 100% 100%;
+                "
+            >
+                <div  style="background-color: #90e0ef;padding: 30px 50px;">
+                    {% if received %}
+                        {% if not success %}
+                            <div>
+                                <h3>Transaction failed, Try again</h3>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div>
+                            <img src="{% static 'main/images/process.gif' %}"
+                                alt="loader"
+                            />
+                            <h3>A push notification has been sent, complete transaction</h3>
+                            <a href="{% url "main:payment_response" %}">
+                                <button>
+                                    Finish Transaction
+                                </button>
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

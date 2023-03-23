@@ -5,14 +5,18 @@
     <div class="header">
         <div class="logo">
              <a href="#">
-                <h4>Tukoreug</h4>
+                 <img src="{% static 'main/images/needed.png' %}"
+                    alt="logo"
+                    style="width:90px;height:80px;"
+
+                />
              </a>
         </div>
         <div class="navigation">
             <input type="checkbox" class="toggle-menu">
             <div class="hamburger"></div>
             <ul class="menu">
-                <li><a href="#">Home</a></li>
+                <li><a href="{% url 'main:index' %}">Home</a></li>
                 <li><a href="{% url 'main:login' %}">Login</a></li>
                 <li><a href="{% url 'main:sign' %}">SignUp</a></li>
             </ul>

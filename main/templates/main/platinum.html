@@ -2,78 +2,70 @@
 {% load static %}
 {% block content %}
 {% load crispy_forms_tags %}
-    <div class="container-fluid">
+    <div>
         {% include "main/snippets/dashtop.html" with instance=obj %}
-        <div class="row">
+        <div style="display:flex;flex-direction:row">
             {% include "main/snippets/sidepanel.html" with registered=registered %}
             <div class="col col col" style="padding:40px;
-                padding:30px;
+                padding:15px;
                 background-repeat: no-repeat;
                 background-image: url(../../static/main/images/conc.jpg);
                 background-size: 100% 100%;
             "
             >
-                <div style="background-color: #90e0ef;
-                    height: 90vh;width:96%;padding: 40px;border-radius: 10px;"
-                >
+                <div class="get_me">
                     <div style="display:flex;flex-direction:row;justify-content:space-between;">
-                        
+
                         <button  style="background-color:#0081B4;height: 40px;
                             border: 2px solid #0081B4;border-radius: 8px;color: white;
                             width:20%;
                         " onclick="history.back()">
                             Back
                         </button>
-                        <button  style="background-color:blue;height: 40px;
-                            border: 2px solid blue;border-radius: 8px;color: white;
-                            width:20%;
-                        ">
-                            Home
-                        </button>
-                    </div> 
+                        <a  class="my-dash"  " href={% url "main:dash" %} style="text-decoration:none;">
+                            <h5 style="text-align:center;font-weight:bold;">
+                                Dashboard
+                            </h5>
+                        </a>
+                    </div>
+                    {% for msg  in messages %}
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert"  data-closable>
+                            <strong>{{ msg }}</strong>
+                            <button class="close-button" aria-label="Close alert" type="button" data-close>
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}
                     <h4 style="text-align:center;font-size:25px;font-weight: bold;margin-top:20px;">
                         Platinum Package
                     </h4>
-                    
-                        
-                            <div class="container" 
-                                style="
-                                    padding: 50px 50px;
-                                    background-color:white;
-                                    height:50vh;width:50%;
-                                    margin-top:30px;
-                                    border-radius: 10px;
-    
-                                "
-                            >
-                                <h6 style="text-align:center;
-                                    font-weight: bold;font-family:Helvetica;line-height: 2.2;">
-                                    Activate this package with a minimum of 100000 and above
-                                </h6>
-                                <form  method="POST" style="margin-top:40px;">
-                                    {% csrf_token %}
-                                    {{ form|crispy }}          
-                                    <button class="button is-success is-fullwidth  mt-3"
-                                        type="submit" style="width:300px;height: 40px;
-                                        border:2px solid blue;font-weight: bold;
-                                        font-family: DM Sans,sans-serif;
-                                        background-color: blue;margin-top: 30px;
-                                        border-radius:5px;
-                                        font-size: 12px;color: white;
-                                    ">
-                                         Continue
-                                    </button>
-                                </form>
-                            </div
-                        
-                         
-            
-                    
-                    
+                    <div class="container_now">
+                        <h6 class="text-after">
+                            Activate this package with a minimum of 100000 and above
+                        </h6>
+                        <form class="heen" method="POST" style="margin-top:40px;">
+                            {% csrf_token %}
+                            {{ form|crispy }}
+                            <button class="button is-success is-fullwidth  mt-3"
+                                type="submit" style="width:300px;height: 40px;
+                                border:2px solid green;font-weight: bold;
+                                font-family: DM Sans,sans-serif;
+                                background-color: green;margin-top: 30px;
+                                border-radius:5px;
+                                font-size: 12px;color: white;
+                            ">
+                                Continue
+                            </button>
+                        </form>
+                    </div
+
+
+
+
                 </div>
             </div>
         </div>
     </div>
-      
+
 
 {% endblock %}

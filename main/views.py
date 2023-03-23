@@ -4,18 +4,26 @@ env = environ.Env()
 environ.Env.read_env()
 
 from django.shortcuts import render,redirect
+from django.core.paginator import Paginator, EmptyPage
+#===above have imported the paginator
 from django.contrib.auth import login as auth_login, authenticate,logout
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
 from django.http import HttpResponse, HttpResponseRedirect
 
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 
 import random, math, requests,json
 from django.http import JsonResponse
 from django.urls import reverse
 
 from rave_python import Rave,  Misc, RaveExceptions
+
+from .utils import*
+
+
+from django.contrib.auth.hashers import check_password
 
 from .forms import*
 # Create your views here.
@@ -26,7 +34,13 @@ from .silicon import*
 
 #=====initially store the email as yours and modify it through the global scope
 current_email = "bbosalj@gmail.com"
-min_amount = 20000
+
+#====storing the current user====
+current_user = None #we are gonna change this later in the global scope
+
+admin_email="support@tukoreug.com" #this is the admin email now
+
+
 
 show_popup = False
 
@@ -35,126 +49,198 @@ show_popup = False
 child_grands = []
 
 
-#==view to handle the callback data sent to us from silicon pay
+#==just do it the raw way here
+
+
+
+@csrf_exempt
 @require_http_methods(['GET', 'POST'])
 def handle_callback(request):
-    #now pick the data sent to me by silicon pay
-    #{
-    #    "status":"successful",
-    #    "amount":"xxxxx",
-    #    "txRef":"XXXX",
-    #    "nework_ref":"XXXXX",
-    #    "msisdn":"XXXXX",
-    #    "secure_hash":"XXXXX"
-    #    }
     #===the above is the response that is sent to the callback url
-    status = request.GET.get('status', None)
-    amount = request.GET.get('amount', None)
-    user=request.user
-    wallet = Wallet.objects.get(owner=user)
-    if status == "successful":
-        user.paid = True
-        user.save()#saving the paid
-        old_balance = wallet.balance #===after getting the old balance we have to increment it
-        new_balance = old_balance+int(amount) #since our response is returning us an  amount
-        wallet.balance = new_balance
-        wallet.save()
+    #===checking the length of the dictionary containing the request objects
 
-        try:
-            child = Child.objects.get(user=user)
-            if child:
-                #==look for the parent
-                parent = child.parent#now we have the parent
-                #====fetch the grand parent aswell
-                parent_user = parent.user#this is for the parent
-
-                wallet_user = Wallet.objects.get(owner=parent_user)
-                #go ahead and credit the wallet of the parent
-                if user.paid:
-                    current_balance = wallet_user.balance
-                    parent_earnings = int(amount)*0.5
-                    wallet_user.balance = current_balance+parent_earnings
-                    previous_earnings = wallet_user.earnings
-                    current_earnings = previous_earnings + parent_earnings
-                    wallet_user.earnings = current_earnings
-                    wallet_user.save()
-                #====child may have a grand father or not so first find out
-
-                    co_earnings = 0;grand_earnings = 0
-                    if child.is_grandchild:
-                        #have to get the actual object
-                        try:
-                            grand_parent = GrandParent.objects.get(grand_child=child)
-                            grand_user = grand_parent.user# this is the grand parent user account
-                            #======now also get the grand user wallet details====
-                            grand_earnings = int(amount)*0.2
-                            co_earnings = int(amount)*0.3
-
-                            wallet_grand_parent = Wallet.objects.get(owner=grand_user)
-                            grand_current_balance = wallet_grand_parent.balance
-                            #credit the grand parent now
-                            wallet_grand_parent.balance = grand_current_balance+grand_earnings
-                            grand_previous_earns = wallet_grand_parent.earnings
-
-                            current_grand_earns = grand_previous_earns + grand_earnings
-                            wallet_grand_parent.earnings = current_grand_earns
-                            wallet_grand_parent.save()
-
-                            return redirect(reverse("main:dash")) #since user is still the same user
-                        except GrandParent.DoesNotExist:
-                            pass
-                    else:
-                        #now means child has no grandparent so share of the grandparent is taken up by company
-                        admin = Stats.objects.all().first()
-                        admin_balance = admin.balance
-                        admin_profits = admin.profits
-
-
-                        co_earnings = int(amount)*0.5
-                        admin.balance = admin_balance + co_earnings
-
-                        admin.profits = admin_profits + co_earnings
-                        return redirect(reverse("main:dash")) #since user is still the same user
-                return redirect(reverse("main:dash")) #since user is still the same user
-            else:
-                return redirect(reverse("main:dash")) #since user is still the same user
-        except Child.DoesNotExist:
-            pass
-        messages.success(request, "Deposit was successful")
-        return redirect(reverse("main:dash")) #since user is still the same user
+    #===just declare a variable amd manipulate that===
+    #==declaring received
+    success = False
+    received  = False
+    #===get the user from the global scope===
+    user = current_user
+    response_dict = json.loads(str(request.GET))#first converting the JSON object to python code
+    print(user,response_dict, flush=True)
+    if len(response_dict) == 0:
+        #return template with the loader telling user to complete transaction==
+        received = False
+        #just redirect since transaction is not yet compete
+        return render(request, "main/after.html",{"obj":user, "received":received, "success":success})
     else:
-        messages.error(request, "Transaction didnot complete")
-        return redirect(reverse("main:dash")) #since user is still the same user
+        user=current_user
+        wallet = Wallet.objects.get(owner=user)
+        received = True
+        #now that i have received a response go ahead and use the response
+        print(request.GET)
+        #now that i have the request, get the status and the amount
+        status = request.GET.get('status', None)
+        amount = request.GET.get('amount', None)
+        #====now in the callback===
+        print(status,amount)
+
+        #===set variable to indicate transaction didnt complete
+        if status == "successful":
+            success = True
+            user.paid = True
+            user.save()#saving the paid
+            old_balance = wallet.balance #===after getting the old balance we have to increment it
+            new_balance = old_balance+int(amount) #since our response is returning us an  amount
+            wallet.balance = new_balance
+            wallet.save()
+
+            try:
+                child = Child.objects.get(user=user)
+                if child:
+                    #==look for the parent
+                    parent = child.parent#now we have the parent
+                    #====fetch the grand parent aswell
+                    parent_user = parent.user#this is for the parent
+
+                    wallet_user = Wallet.objects.get(owner=parent_user)
+                    #go ahead and credit the wallet of the parent
+                    if user.paid:
+                        current_balance = wallet_user.balance
+                        parent_earnings = int(amount)*0.5
+                        wallet_user.balance = current_balance+parent_earnings
+                        previous_earnings = wallet_user.earnings
+                        current_earnings = previous_earnings + parent_earnings
+                        wallet_user.earnings = current_earnings
+                        wallet_user.save()
+                        #====child may have a grand father or not so first find out
+
+                        co_earnings = 0;grand_earnings = 0
+                        if child.is_grandchild:
+                        #have to get the actual object
+                            try:
+                                grand_parent = GrandParent.objects.get(grand_child=child)
+                                grand_user = grand_parent.user# this is the grand parent user account
+                                #======now also get the grand user wallet details====
+                                grand_earnings = int(amount)*0.2
+                                co_earnings = int(amount)*0.3
+
+                                wallet_grand_parent = Wallet.objects.get(owner=grand_user)
+                                grand_current_balance = wallet_grand_parent.balance
+                                #credit the grand parent now
+                                wallet_grand_parent.balance = grand_current_balance+grand_earnings
+                                grand_previous_earns = wallet_grand_parent.earnings
+
+                                current_grand_earns = grand_previous_earns + grand_earnings
+                                wallet_grand_parent.earnings = current_grand_earns
+                                wallet_grand_parent.save()
+
+                                #return redirect(reverse("main:dash")) #since user is still the same user
+                                #return render(request,
+                                #    "main/loading.html",
+                                #    {"obj":user, "wallet":wallet,"received":received,"success":success}
+                                #)
+                                return redirect(reverse("main:dash"))
+                            except GrandParent.DoesNotExist:
+                                pass
+                        else:
+                            #now means child has no grandparent so share of the grandparent is taken up by company
+                            admin = Stats.objects.all().first()
+                            admin_balance = admin.balance
+                            admin_profits = admin.profits
+
+
+                            co_earnings = int(amount)*0.5
+                            admin.balance = admin_balance + co_earnings
+
+                            admin.profits = admin_profits + co_earnings
+                            return redirect(reverse("main:dash")) #since user is still the same user
+
+                    return redirect(reverse("main:dash")) #since user is still the same user
+
+                else:
+                    return redirect(reverse("main:dash")) #since user is still the same user
+            except Child.DoesNotExist:
+                pass
+        else:
+            success = False
+            messages.success(request, "Deposit was successful")
+            #return redirect(reverse("main:dash")) #since user is still the same user
+            #now actually u need to display the actual message sent because it failed
+
+            return render(request, "main/after.html",{"obj":user, "received":received, "success":success})
+
+    messages.error(request, "Transaction didnot complete")
+    return redirect(reverse("main:dash")) #since user is still the same user
 
 
 
 
 
-
+@csrf_exempt
 @require_http_methods(['GET', 'POST'])
 def payment_response(request):
     status = request.GET.get('status', None)
     tx_ref = request.GET.get('tx_ref', None)
-
-
+    print(request.GET, flush=True)
     print(status)
     print(tx_ref)
+    #====delete the session regardless whether it was successful or cancelled===
+
+    min_amount = return_min_amount(request)
+    #====get the==admin user
+    admin_user = User.objects.get(now_admin=True)
+    total_deposits = admin_user.total_deposits
+    #====withdraws
+    total_withdraws = admin_user.total_withdraws
+    #====
+    total_profits = admin_user.total_profits
+    #====
+    total_balance = admin_user.total_balance
+
 
     #====now get the details u passed
-    user = User.objects.get(email=current_email)
-    #now get the wallet details and increment the balance
-    wallet = Wallet.objects.get(owner=user)
+    found  = False
+
+    current_user = request.user
+
+    #current_user = User.objects.get()
+    if current_user in User.objects.all().distinct():
+        found = True
+    else:found = False
+    if found:
+        wallet = Wallet.objects.get(owner=current_user)
+        #now get the wallet details and increment the balance
+    #==now getting the stats since we are gonna use them===
+
     if status == "successful":
+        messages.success(request, "Transaction successful")
         #update the wallet details, i dont need to store the
         #now get the details balance,
+        user = current_user#now assigning the user variable to the current user
         user.paid = True
         user.save()#saving the paid
         old_balance = wallet.balance #===after getting the old balance we have to increment it
-        new_balance = old_balance+min_amount
+        new_balance = old_balance  #dont add that to the total balance
         wallet.balance = new_balance
         wallet.save()#saving the wallet
         #====now adding the referral algorithm that the parent earns
         #first check if user is child and then reward the parent after
+
+
+        #====audit the system by first sending an email to my gmail====
+        #email_body = '<## ==== {0}, Deposit transaction completed by {1}. ###>'.format(min_amount,user)
+        #data = {
+        #    'email_body':email_body,
+        #    'to_email':"bbosalj@gmail.com",
+        #    'email_subject':'Tukoreug audit report'
+        #}
+        #Util.send_email(data)
+        #increment the deposits and balance====
+        total_deposits += min_amount
+        admin_user.total_deposits = total_deposits
+        total_balance += min_amount
+        admin_user.total_balance = total_balance
+        admin_user.save() #==have saved the admin details now
         try:
             child = Child.objects.get(user=user)
             if child:
@@ -195,20 +281,36 @@ def payment_response(request):
                             wallet_grand_parent.earnings = current_grand_earns
                             wallet_grand_parent.save()
 
+                            #==now increment the admin earnings====
+                            total_profits += co_earnings
+                            admin_user.total_profits = total_profits
+                            total_balance += co_earnings
+                            admin_user.total_balance = total_balance
+                            admin_user.save()
+                            #profits += co_earnings
+                            #admin_balance += co_earnings
+                            #now_stats.save()
+
                             return redirect(reverse("main:dash")) #since user is still the same user
                         except GrandParent.DoesNotExist:
                             pass
                     else:
                         #now means child has no grandparent so share of the grandparent is taken up by company
-                        admin = Stats.objects.all().first()
-                        admin_balance = admin.balance
-                        admin_profits = admin.profits
-
+                        #profits = now_stats.profits
 
                         co_earnings = min_amount*0.5
-                        admin.balance = admin_balance + co_earnings
 
-                        admin.profits = admin_profits + co_earnings
+                        #==increment the admin details
+                        total_profits += co_earnings
+                        admin_user.total_profits = total_profits
+                        total_balance += co_earnings
+                        admin_user.total_balance = total_balance
+                        admin_user.save()
+
+                        #now_stats.profits = admin_profits+co_earnings
+                        #profits += co_earnings
+                        #now_stats.save()
+                        messages.success(request, "Deposit was successful")
                         return redirect(reverse("main:dash")) #since user is still the same user
                 return redirect(reverse("main:dash")) #since user is still the same user
             else:
@@ -217,9 +319,13 @@ def payment_response(request):
             pass
         messages.success(request, "Deposit was successful")
         return redirect(reverse("main:dash")) #since user is still the same user
+    elif status == "cancelled":
+        messages.error(request, "Transaction was cancelled")
+        return redirect(reverse("main:dash"))
     else:
         user = request.user
         user_wallet = Wallet.objects.get(owner=user)
+
         messages.error(request, "Deposit unsuccessful")
         #return redirect(reverse("main:dash"))
         return render(request, "main/dashboard.html", {
@@ -234,7 +340,8 @@ def payment_response(request):
 #initially to return the index page
 def index(request):
     if request.user.is_authenticated:
-        return redirect(reverse("main:dash"))
+        if not request.user.now_admin:
+            return redirect(reverse("main:dash"))
     return render(request, "main/index.html", {})
 
 #===authentication
@@ -245,19 +352,20 @@ def signup(request):
 #=====add  anew signup view
 def signtrue(request):
     if request.user.is_authenticated:
-        #since i dont want the user to register every time
-        user = request.user
-        user_wallet = Wallet.objects.select_related().get(owner=user)
+        if not request.user.now_admin:
+            #since i dont want the user to register every time
+            user = request.user
+            user_wallet = Wallet.objects.select_related().get(owner=user)
             #now that we have the user model
-        balance = user_wallet.balance;earnings = user_wallet.earnings;bonus=user_wallet.bonus
+            balance = user_wallet.balance;earnings = user_wallet.earnings;bonus=user_wallet.bonus
 
-        #just redirect from here
-        #return redirect("main:dash", pk=user.id)
-        #pk=user.pk
-        messages.success(request, "User  already Authenticated")
-        return render(request, "main/dashboard.html", {
-           "obj":user, "wallet":user_wallet,"messages":messages
-        })
+            #just redirect from here
+            #return redirect("main:dash", pk=user.id)
+            #pk=user.pk
+            messages.success(request, "User  already Authenticated")
+            return render(request, "main/dashboard.html", {
+                "obj":user, "wallet":user_wallet,"messages":messages
+            })
     else:
         if request.method == 'POST':
             form = RegisterForm(request.POST)
@@ -271,6 +379,13 @@ def signtrue(request):
                     username=username,email=email,password=password
                 )
                 user.save()
+                #===filter to check if user exists===
+                #if User.objects.filter(username=username).exists():
+                #    messages.error(request, "User with username exists")
+                #    return redirect(reverse("main:sign"))
+                #if User.objects.filter(email=email).exists():
+                #    messages.error(request, "User with email already exists")
+                #    return redirect(reverse("main:sign"))
                 auth_login(request, user)
                 #====go ahead and change the registered variable
                 authed = False#its now ==== True
@@ -284,37 +399,45 @@ def signtrue(request):
                 username = user.username
 
                 #now increment he number of the users for the admin to see
-                stats_now = Stats.objects.create(
-                    balance=int(0),
-                    deposits = int(0),
-                    widthdraws = int(0),
-                    nousers = int(0),
-                    no_active_users=int(0),profits = int(0)
-                )
-                stats_now.save()
+                #stats_now = Stats.objects.create(
+                #    balance=int(0),
+                ##     deposits = int(0),
+                #    widthdraws = int(0),
+                #    nousers = int(0),
+                #    no_active_users=int(0),profits = int(0)
+                #)
+                #stats_now.save()
                 #since i dont need to create data for every new user but just update the first
                 #===initiating the model but i have to increment the attributes later on
                 return render(request, "main/dashboard.html", {
                     "wallet":user_wallet,
                     "obj":user,
                     "authed":authed, #since i need to use it in the side panel
-                    "messages":messages
                 })
-            messages.error(request, "Unsuccessful registration. Invalid information")
+            messages.error(request, "Unsuccessful registration. User with username/email exists")
         form = RegisterForm()
         authed = True
         return render(request, "main/profile.html", {"register_form": form,"authed":authed})
 
+#==adding signup logic for admin=====
+#just add aboolean for the now_admin=== to clarify
+
+
+
+
 #====choose package
 def choose_package(request):
-    user = request.user
-    return render(request, "main/package.html", {"obj":user})
+    if request.user.is_authenticated:
+        if not request.user.now_admin:
+            user = request.user
+            return render(request, "main/package.html", {"obj":user})
 
 
 encryption_key="4mMWbCdle3249f2760558ff0c23d03a7fee4764c"
 #===code to handle the individual packages
 #===also u have to give user input to add in the phone
 def handle_input_phone(request):
+    global current_user
     user = request.user
     if request.method == "POST":
         global min_amount, show_popup
@@ -324,95 +447,137 @@ def handle_input_phone(request):
             #go ahead with the transaction
             #response = silicon_top(phone,min_amount)
             url = "https://silicon-pay.com/process_payments"
-            payload = {
+            payload = json.dumps({
                 "req":"mobile_money",
                 "currency":"UGX",
                 "phone":format_phone_number(phone),
                 "encryption_key":encryption_key,
                 "amount":int(min_amount),
                 "emailAddress":DEFAULT_ADDRESS,
-                "call_back":"http://tukoreug.com/topup/status",
+                "call_back":"https://tukoreug.com/topup/status",
                 "txRef":str(uuid4())
-            }
+            })
             headers = {
                 'Content-Type':'application/json'
             }
-            response = requests.post(url, headers=headers,data=payload)
+            response = requests.request("POST",url, headers=headers,data=payload)
+            #i want the request to wait for only one second
             #return response.text
             response = response.text
-            print(response)
-            #if response['status'] == "Successful":
-            #    show_popup = True#  i think i have to put this in the global scope
-            #    messages.success(request, "Success, complete transaction")
-            #    return render(request, "main/showup.html", {"show":show_popup})
-            #    #==redirect to the callback
-            #    return redirect(reverse("main"))
-
-            #else:
-            #    show_popup = False
-            #    return render(request, "main/showup.html", {"show":show_popup})
+            new_response = (eval(response))# realised it wasnt an actual dictionary
+            print(new_response['status'])
+            if new_response['status'] == "Successful":
+                show_popup = True#  i think i have to put this in the global scope
+                messages.success(request, "Success, complete transaction")
+                #return render(request, "main/showup.html", {"show":show_popup})
+                #==redirect to the callback
+                current_user = request.user
+                return redirect(reverse("main:notice"))
+            else:
+                #====this then would be aserver error, since pop up has to be showed
+                #==this means there is an issue with server or internet so tell them to try again
+                messages.error(request, "Error, Try Again")
+                form = PaymentForm()
+                return render(request,"main/topup.html", {"form":form, "obj":user, "show":show_popup})
     form = PaymentForm()
     return render(request,"main/topup.html", {"form":form, "obj":user, "show":show_popup})
 
 
+#===function returns argument===
+def ret_arg(amount):
+    return int(amount)
+
 def handle_silver(request):
     global min_amount
-    user = request.user
-    if user:
-        user.account_type = "SILVER"
-        min_amount = user.get_deposit
-        #==now instead here bring in the silicon pay funcs
-        return redirect(reverse("main:handle_input"))
-
-    else:
-        pass
+    if request.user.is_authenticated:
+        if not request.user.now_admin:
+            user = request.user
+            if user:
+                user.account_type = "SILVER"
+                request.session['min_amount'] = int(20000)
+                #min_amount = int(20000)
+                #====pass in #rgument====
+                #ret_arg(user.get_deposit)
+                #now since i have gone with flutterwave, am gonna just redirect it to the deposit url
+                return redirect(reverse("main:deposit"))
+            else:
+                pass
     #==go ahead and pass in the deposit amount
 
 #===anyway just go ahead for now with individual funcs
 def handle_gold(request):
     global min_amount
-    user = request.user
-    if user:
-        user.account_type = "GOLD"
-        min_amount = user.get_deposit
-        return redirect(reverse("main:deposit"))
-    return
+    if request.user.is_authenticated:
+        if not request.user.now_admin:
+            user = request.user
+            if user:
+                user.account_type = "GOLD"
+                #=====set session from here======
+                request.session['min_amount'] = int(50000)
+                #min_amount = int(50000)
+                return redirect(reverse("main:deposit"))
+            return
 
 #====now for the platinum bit of it
 def handle_platinum(request):
-    user = request.user
-    if request.method == "POST":
-        global min_amount
-        form = PlatForm(request.POST)
-        if form.is_valid():
-            amount = int(form.cleaned_data['amount'])
-            if amount >= 100000:
-                min_amount = amount
-                user.account_type = "PLATINUM"
-                return redirect(reverse("main:deposit"))
-            else:
-                messages.error(request, "Minimum amount is 100000")
-                form = PlatForm()
-                return render(request,"main/platinum.html", {"form":form, "obj":user})
-        return
-    form = PlatForm()
-    return render(request,"main/platinum.html", {"form":form, "obj":user})
+    global min_amount
+    if request.user.is_authenticated:
+        if not request.user.now_admin:
+            user = request.user
+
+            if request.method == "POST":
+                form = PlatForm(request.POST)
+                if form.is_valid():
+                    amount = int(form.cleaned_data['amount'])
+                    if amount >= int(100000):
+                        user.account_type = "PLATINUM"
+                        request.session['min_amount'] = amount
+                        #min_amount = amount
+                        return redirect(reverse("main:deposit"))
+                    else:
+                        messages.error(request, "Minimum amount is 100000")
+                        form = PlatForm()
+                    return render(request,"main/platinum.html", {"form":form, "obj":user})
+
+            form = PlatForm()
+            return render(request,"main/platinum.html", {"form":form, "obj":user})
 
 
 
 
 #===function to handle the platinum since user has to add in their amount
 
-def process_payment(name,email):
+
+
+def return_min_amount(request):
+    min_amount = request.session.get('min_amount', int(20000))
+    return min_amount
+
+
+def process_payment(request,name,email):
     auth_token = env('SECRET_KEY')
-    hed = {'Authorization':'Bearer ' + auth_token}
+    #auth_token = 'FLWSECK_TEST-74b70b363bfa87c1292a61bdc95eb38b-X'
+    #auth_token = 'FLWSECK_TEST-cd4589948d43624e7215b2b48b70c788-X'
+    hed = {
+        'Authorization':'Bearer ' + auth_token,
+        'Content-Type':'application/json',
+        'Accept': 'application/json'
+    }
     phone='0706626855'
-    data = {
+
+    #=====get the min_amo
+    min_amount = return_min_amount(request)
+    #===set the min_amount in the session
+
+
+    #====chnage and use json.dumps====
+    url = ' https://api.flutterwave.com/v3/payments'
+    data = json.dumps({
         "tx_ref":''+str(math.floor(1000000 + random.random()*9000000)),
         "amount":min_amount,
         "currency":"UGX",
-        "redirect_url":"http://tukore.pythonanywhere.com/callback",
-        "payment_options":"card",
+        "redirect_url":"https://www.tukoreug.com/callback",
+        "payment_options":"mobilemoneyuganda,card",
         "meta":{
             "consumer_id":23,
             "consumer_mac":"92a3-912ba-1192a"
@@ -426,11 +591,19 @@ def process_payment(name,email):
             "title":"Tukoreug",
             "description":"Earn instantly",
             "logo":"https://getbootstrap.com/docs/4.0/assets/brand/bootstrap-solid.svg"
-        }
-    }
-    url = ' https://api.flutterwave.com/v3/payments'
-    response = requests.post(url, json=data, headers=hed)
+        },
+        #"subaccounts": [
+        #    {
+        #        "id": env('SUB_ID'),
+        #    }
+        #],
+    })
+    #response = requests.post(url, json=data, headers=hed)
+    #let turn and use this code instead===
+    response = requests.request("POST",url, headers=hed,data=data)
     response = response.json()
+    #response = response.text
+    print(response, flush=True)
     link = response['data']['link']
     return link
 
@@ -443,12 +616,16 @@ def store_details(email,amount):
     return details
 
 def deposit(request):
-    username = request.user.username;
+    global current_user;
+    user = request.user
     email = request.user.email
 
+    username = request.user.username
     #==to modify the email you have to first specify the global keyname
-    global current_email; current_email = email
-    return redirect(process_payment(username,email))
+
+    current_user = user
+    #==since min_amount will bechanging so we will have
+    return redirect(process_payment(request,username,email))
 
 
 #======now handling the withdraws===
@@ -463,6 +640,13 @@ def withdraw(request):
                 #now that u have the user get the earnings of the user so that to withdraw
                 #they can withdraw after 1 month
                 user_wallet = Wallet.objects.get(owner=user)
+
+                #====get the admin details===
+                admin_user = User.objects.get(now_admin=True)
+                total_balance = admin_user.total_balance
+                total_withdraws = admin_user.total_withdraws
+                #===got the withdraws====
+                #====
                 if user_wallet:
                     earnings = user_wallet.earnings
                     balance = user_wallet.balance
@@ -473,6 +657,9 @@ def withdraw(request):
                             res = transfer_money_to_phone(phone,int(amount),user.username)
                             print(res)
                             if not res['error']:
+                                #===go ahead aswell and increase the dashboard admin
+                                #admin_withdraws += int(amount)
+                                #admin_balance -= int(amount)
                                 #meaning that the error is False, go ahead and update the wallet
                                 new_balance = balance - int(amount)
                                 #earn_current = earnings - int(amount)
@@ -491,12 +678,28 @@ def withdraw(request):
                                 #    withdraws=withdraw
                                 #)
                                 #wallet_now.save()
+
+                                #====now update the admin_details====
+                                total_withdraws += int(amount)
+                                admin_user.total_withdraws = total_withdraws
+                                total_balance -= int(amount)
+                                admin_user.total_balance = total_balance
+                                admin_user.save()
+
+                                return redirect(reverse("main:dash"))
+                                messages.success(request, "Withdraw was successful")
+                            else:
+                                messages.success(request, "Withdraw failed")
                                 return redirect(reverse("main:dash"))
                         except RaveExceptions.IncompletePaymentDetailsError as e:
                             return render(request, "main/withdraw.html", {"form":form})
+                    else:
+                        messages.error(request, "Insufficient balance")
+                        return render(request, "main/withdraw.html", {"form":form})
         form =  WithdrawForm()
         return render(request, "main/withdraw.html", {"form":form})
     else:
+        messages.error(request, "User is not authenticated")
         return redirect(reverse("main:login"))
 #=====now getting the myprofile details=======
 def myprofile(request):
@@ -515,7 +718,11 @@ def myprofile(request):
 
 
 #====custom login and logout funcs====
-
+@login_required
+def admin_logout(request):
+    logout(request)
+    messages.info(request, "Admin Logged out successfully")
+    return redirect(reverse("main:admin_login"))
 
 
 #====now to logout the user
@@ -528,7 +735,8 @@ def custom_logout(request):
 #====actual login view====
 def logintrue(request):
     if request.user.is_authenticated:
-        return redirect(reverse("main:dash"))
+        if not request.user.now_admin:
+            return redirect(reverse("main:dash"))
         #u are supposed to pass in the variables
     if request.method == "POST":
         form  = LoginForm(request.POST)
@@ -538,52 +746,157 @@ def logintrue(request):
                 password = form.cleaned_data['password']
             )
             if user is not None:
-                auth_login(request, user)
-                messages.success(request, "Login successful.")
-                user_wallet = Wallet.objects.select_related().get(owner=user)
-                return render(request, "main/dashboard.html", {
-                    "obj":user, "wallet":user_wallet
-                })
+                if not user.is_blocked:
+                    #handling case when the user was blocked
+                    auth_login(request, user)
+                    messages.success(request, "Login successful.")
+                    user_wallet = Wallet.objects.select_related().get(owner=user)
+                    return render(request, "main/dashboard.html", {
+                        "obj":user, "wallet":user_wallet
+                    })
+                else:
+                    messages.error(request, "Blocked by admin contact admin to unblock")
+                    return render(request, "main/blocked.html",{})
+                    #==must display a template here
+            else:
+                messages.error(request, "Check Email or password")
+                for error in list(form.errors.values()):
+                    messages.error(request, error)
         else:
             for error in list(form.errors.values()):
                 messages.error(request, error)
     form = LoginForm()
     return render(request, "main/login.html",{"form":form})
 
+#===change password==== view
+@login_required
+def change_userpwd(request):
+    if request.method == "POST":
+        form  = UpdatePasswordForm(request.POST)
+        if form.is_valid():
+            old_password = form.cleaned_data['OldPassword']
+            new_password = form.cleaned_data['NewPassword']
+            confirm_password = form.cleaned_data['ConfirmPassword']
 
-#===now work on view to start accepting payments=====
+            #===getting the current hashed password
+            currentpassword= request.user.password
+            match_check = check_password(old_password, currentpassword)
+            if match_check:
+                if new_password == confirm_password:
+                    user = request.user
+                    user.set_password(confirm_password)
+                    user.save()
+                    messages.success(request, "User password Updated")
+                    return redirect(reverse("main:dash"))
+                else:
+                    messages.error(request, "New Password and confirm password Dont match")
+            else:
+                messages.error(request, "You entered a wrong current password")
+        else:
+            for error in list(form.errors.values()):
+                messages.error(request, error)
+    form = UpdatePasswordForm()
+    return render(request, "main/change_pwd.html",{"form":form})
+
+
+#===admin signup and admin logins===
+def admin_signup(request):
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            email = form.cleaned_data.get('email')
+            password = form.cleaned_data.get('password')
+            user = User.objects.create_user(
+                username=username,email=email,password=password,now_admin=True
+            )
+            user.save()
+            auth_login(request, user)
+            print('user created....')
+            messages.success(request, "Admin registration successful.")
+
+            return redirect(reverse("main:admin_login"))
+    else:
+        form = RegisterForm()
+        return render(request, "main/admin_signup.html", {"register_form": form})
+
+#=====now the admin login===
+def admin_login(request):
+    if request.user.is_authenticated and request.user.now_admin:
+        return redirect(reverse("main:get_admin"))
+        #u are supposed to pass in the variables
+    else:
+        if request.method == "POST":
+            form  = LoginForm(request.POST)
+            if form.is_valid():
+                user = authenticate(
+                    username = form.cleaned_data['username'],
+                    password = form.cleaned_data['password']
+                )
+                if user is not None:
+                    if user.now_admin:
+                        auth_login(request, user)
+                        messages.success(request, "Admin Login successful.")
+
+                        return redirect(reverse("main:get_admin"))
+            else:
+                for error in list(form.errors.values()):
+                    messages.error(request, error)
+        form = LoginForm()
+        return render(request, "main/adminlogin.html",{"form":form})
+
 
 #======now view to retrieve the admin details====
-def get_admin(request):
-    nousers = User.objects.all().count();
-    #activeusers = [k for k in User.objects.filter(paid==True)]
-    #activeusers = len(activeusers)
+def get_admin_details(request):
+    if request.user.is_authenticated and request.user.now_admin:
+        nousers = User.objects.filter(now_admin=False).count()
+        no_active_users = User.objects.filter(paid=True).count()
 
 
-    if Stats.objects.all().count() > 0:
-        admin_stat = Stats.objects.all().first()
-        balance = admin_stat.balance; deposits = admin_stat.deposits;
-        withdraws = admin_stat.widthdraws;
-        profits = admin_stat.profits
+        #===get the details====
+        admin_user = User.objects.get(now_admin=True)
+        total_balance = admin_user.total_balance
+        total_deposits = admin_user.total_deposits
+        total_withdraws = admin_user.total_withdraws
+        total_profits = admin_user.total_profits
+        return render(request, "main/admindash.html", {
+            "balance":total_balance,
+            "deposits":total_deposits,
+            "withdraws":total_withdraws,
+            "nousers":nousers,
+            "active_users":no_active_users,
+            "profits":total_profits
+        })
     else:
-        balance = 0; deposits = 0;withdraws = 0; profits = 0
+        return redirect(reverse("main:admin_login"))
 
-    return render(request, "main/admindash.html", {
-        "balance":balance,
-        "deposits":deposits,
-        "withdraws":withdraws,
-        "nousers":nousers,"profits":profits})
+
+#===now get the users to display to the admin panel====
+def get_users(request):
+    users = User.objects.all().order_by("username").exclude(now_admin=True)
+    paginator = Paginator(users, per_page=8)
+    #====we also need the total number of pages====
+    num_pages = paginator.num_pages
+    page_num = request.GET.get('page', 1)
+    try:
+        page = paginator.page(page_num)
+    except EmptyPage:
+        page = paginator.page(1)
+    page_object = paginator.page(page_num)
+
+    return render(request, "main/users.html", {"page_obj": page_object,"num_pages":num_pages,"page_num":page_num})
 
 def dashboard(request):
-    if request.user.is_authenticated:
+    if request.user.is_authenticated and request.user.now_admin == False:
         user = request.user
         user_wallet = Wallet.objects.select_related().get(owner=user)
-            #now that we have the user model
+        #now that we have the user model
 
         return render(request, "main/dashboard.html", {
             "obj":user, "wallet":user_wallet
         })
     else:
+        #return render(request, "main/dashboard.html", {})
         return redirect(reverse("main:login"))
     return render(request, "main/dashboard.html", {})
 
@@ -674,14 +987,53 @@ def get_referrals(request):
         return render(request, "main/referrals.html",
              {"user":user, "children":children,"exist":exist,"grand_children":grand_children}
         )
-
     return render(request, "main/referrals.html", {})
+
+#====functionality to block the user=====
+def block_user(request, id):
+    try:
+        #==now get the email from the kwargs
+        #user_email = kwargs.get('email')
+        user_now = User.objects.get(id=id)
+        if user_now:
+            user_now.is_blocked = True
+            user_now.save()#this now means this user has been blocked
+            messages.success(request, "User blocked successfully")
+            return redirect(reverse("main:all_users"))
+        else:
+            messages.error(request, "user not found")
+            return redirect(reverse("main:all_users"))
+    except User.DoesNotExist:
+        messages.error(request, "Couldnt block user")
+        return redirect(reverse("main:all_users"))
+
+
+#===it doesnot need to have a request argument coz its just a function to execute.
+#===now func to unblock the user===
+def unblock_user(request, id):
+    try:
+        user_now = User.objects.get(id=id)
+        if user_now:
+            user_now.is_blocked = False
+            user_now.save()#this now means this user has been blocked
+            messages.success(request, "User Unblocked successfully")
+            return redirect(reverse("main:all_users"))
+        else:
+            messages.error(request, "user not found")
+            return redirect(reverse("main:all_users"))
+    except User.DoesNotExist:
+        messages.error(request, "Couldnt unblock user")
+        return redirect(reverse("main:all_users"))
+
+
+
+
+
 def login(request):
     return render(request, "main/login.html", {})
 
 def reset(request):
     return render(request, "main/reset.html", {})
-
 
 #function to handle default 404 and 500 errors
 def error_404(request, exception):
@@ -691,3 +1043,4 @@ def error_404(request, exception):
 def error_500(request):
     data = {}
     return render(request, "main/error_500.html", data)
+

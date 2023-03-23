@@ -17,7 +17,7 @@
                 <div class="get_mo">
                     <div class="benjie">
                         <h4>
-                            Withdraw   Earnings
+                           Change Password
                         </h4>
                         <button  style="background-color:#0081B4;height: 40px;
                             border: 2px solid #0081B4;border-radius: 8px;color: white;
@@ -36,8 +36,7 @@
                         </div>
                     {% endfor %}
                     <div class="mynor">
-
-                            <form class="gogo" method="POST">
+                            <form class="gogo_new" method="POST">
                                 {% csrf_token %}
                                 {{ form|crispy }}
                                 <button class="button is-success is-fullwidth  mt-3"
@@ -48,10 +47,9 @@
                                     border-radius:5px;
                                     font-size: 12px;color: white;
                                 ">
-                                    Withdraw
+                                    Update Password
                                 </button>
                             </form>
-
                     </div>
                 </div>
             </div>

@@ -4,53 +4,42 @@
 {% load crispy_forms_tags %}
     <section>
         {% include "main/snippets/topbar.html" %}
-
-
-            <div class="row">
+            <div style="display:flex;flex-direction:row;">
                 {% include "main/snippets/sidepanel.html" %}
-                <div class="col col col colbg"
+                <div class="col colbg"
                     style="
-                        padding:30px;
                         background-repeat: no-repeat;
                         background-image: url(../../static/main/images/back.jpeg);
                         background-size: 100% 100%;
                     "
                 >
-                    <div style="margin-top:30px;">
-                        <div style="display:flex;flex-direction:row;justify-content:space-around;">
-                            <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                            <h3 style="
-                                font-weight: bold;font-family: Times New Roman, Times, serif;
 
-                            ">
-                                Create a Secure Profile
-                            </h3>
-                            <i class="fa fa-lock fa-2x"  aria-hidden="true"></i>
-                        </div>
+                    <div  class="topcol">
+                        <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                        <h3 style="
+                            font-weight: bold;font-family: Times New Roman, Times, serif;
+                        ">
+                            Create a Secure Profile
+                        </h3>
+                        <i class="fa fa-lock fa-2x"  aria-hidden="true"></i>
                     </div>
-                    <div class="formnow" style="justify-content: center;">
+                    {% for msg  in messages %}
+                        <div class="callout success">
+                            <button class="close-button" aria-label="Close alert" type="button">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                            <p>
+                                <strong>{{ msg }}</strong>
+                            </p>
+                        </div>
+                    {% endfor %}
+                    <div class="formnow">
                         <form
                             method="POST"  enctype="multipart/form-data"
                         >
                             {% csrf_token %}
                             {{ register_form|crispy }}
-                            <!--
-                                <input id="email" type="email"
-                                name="email" placeholder="Email"
-                                style="height:40px;width: 400px;
-                                    margin-top: 20px;
-                                "
-                            >
-                            <br />
-                            <input id="password" type="password"
-                                name="password" placeholder="Password"
-                                style="height:40px;width: 400px;
-                                    margin-top: 20px;
-                                "
-                            >
-                            <br />
 
-                        -->
                             <button class="button is-success is-fullwidth  mt-3"
                                     type="submit" style="width:400px;height: 40px;
                                         border:2px solid aqua;
@@ -58,22 +47,11 @@
                                         font-family: DM Sans,sans-serif;
                                         background-color: aqua;
                                         border-radius:5px;
-                                    font-size: 12px;
-                                "
+                                        font-size: 18px;
+                                    "
                                 >
                                 Create Profile
                             </button>
-                            <!--
-                                 {% if messages %}
-                                <ul class="messages">
-                                    {% for message in messages %}
-                                        <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>
-                                            {{ message }}
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
-                            -->
 
                             <a href="#" style="text-decoration:none;color:blue;">
                                 <p style="text-align:center;width:400px;margin-top: 40px;font-size: 12px;">
@@ -85,7 +63,8 @@
 
                         </form>
                     </div>
+
                 </div>
-            </div
+            </div>
     </section>
 {% endblock %}

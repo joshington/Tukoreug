@@ -1,0 +1,27 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+
+{% block content %}
+    <section>
+        {% include "main/snippets/dashtop.html" with instance=obj %}
+        <div class="row">
+            {% include "main/snippets/sidepanel.html" with registered=registered %}
+            <div class="col col col"
+                style="
+                    padding:40px;
+                    padding:30px;
+                    background-repeat: no-repeat;
+                    background-image: url(../../static/main/images/conc.jpg);
+                    background-size: 100% 100%;
+                "
+            >
+                <div  style="background-color: #90e0ef; height: 100vh;">
+                    <h4>Transaction Failed</h4>
+                    <h4>{{ reason }}</h4>
+                    <h6>Try Again</h6>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

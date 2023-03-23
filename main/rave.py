@@ -12,6 +12,12 @@ environ.Env.read_env()
 SECRET_KEY = env('SECRET_KEY')
 PUBLIC_KEY = env('PUBLIC_KEY')
 
+PUBLIC_TEST = env('PUBLIC_TEST')
+SECRET_TEST = env('SECRET_TEST')
+
+SUB_ID = env('SUB_ID')
+CARD_NO = env('CARD_NO')
+
 DEFAULT_ADDRESS = 'bbosalj@gmail.com'
 
 rave = Rave(PUBLIC_KEY, SECRET_KEY, usingEnv = False)
@@ -56,15 +62,30 @@ def transfer_money_to_phone(phone, amount, username="Unknown User"):
         "account_bank":"MPS",
 		"account_number":format_phone_number(phone),
 		"amount":amount,
+		"narration":"New transfer",
         "currency":"UGX",
         "beneficiary_name":username,
         "meta":{
             "sender": "Flutterwave Developers",
             "sender_country": "UGA",
-            "mobile_number": "256760810134"
+            "mobile_number": "256761095710"
         }
     }
     res = rave.Transfer.initiate(details)
     return res
 
-
+#function to move money to sub account
+def move_to_subaccount(amount):
+    payload = {
+        # ...
+        card_number:CARD_NO,
+        amount: amount,
+        currency: "UGX",
+        subaccounts: [
+            {
+                id:SUB_ID,
+            }
+        ],
+    }
+    response = rave.Card.charge(payload)
+    return response

@@ -16,15 +16,15 @@
                 "
             >
                 <div  style="background-color: #90e0ef;padding: 30px 50px;">
-                    <input type="checkbox" class="toggle-menu">
-                    <div class="hamburger"></div>
                     <div style="display:flex;flex-direction:row;justify-content:space-between;">
-                        <h4 style="font-size: 27px;margin-left: 80px;">
-                            Admin   Earnings
+                        <h4 style="font-size: 27px;margin-left: 80px;font-weight:bold;">
+                            Admin   Dashboard
                         </h4>
-                        <div  class="nowearn"  style="display:flex;flex-direction:row;">
+                        <!--
+                            <div  class="nowearn"  style="display:flex;flex-direction:row;">
                             <!--  Add the modal from here=====-->
-                            <a href="{% url "main:withdraw" %}">
+                            <!--
+                                <a href="#">
                                 <button  style="background-color:#03045e;height: 40px;
                                     border: 2px solid #03045e;border-radius: 8px;color: white;
                                     margin-left: 15px;
@@ -32,35 +32,58 @@
                                     Withdraw Funds
                                 </button>
                             </a>
-                        </div>
 
+                                </div>
+                            -->
                     </div>
+
+
+                    {% for msg  in messages %}
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert"  data-closable>
+                            <strong>{{ msg }}</strong>
+                            <button class="close-button" data-bs-dismiss="alert" aria-label="Close alert" type="button" data-close>
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}
                     <div class="row" style="margin-top: 22px;justify-content: space-evenly;">
-                        <div class="col-lg-4 col-md-4 col-sm-4"
+                        <div class="col"
                             style="background-color:whitesmoke;height: 150px;
                             margin:6px;padding:20px;border-radius: 10px;">
                             <h4>Account Balance</h4>
                             <h2 style="color:blue;">UGX: {{ balance }}</h2>
                         </div>
-                        <div class="col-lg-4 col-md-4 col-sm-4"
+                        <div class="col"
                             style="background-color:whitesmoke;
                                 height:150px;margin:6px;padding:20px;border-radius: 10px;">
                             <h4>Total Withdraws</h4>
                             <h2 style="color:blue;">UGX: {{ withdraws }}</h2>
                         </div>
-                    </div>
-                    <div class="row" style="margin-top:10px;justify-content: space-evenly;">
-                        <div class="col-lg-4 col-md-4 col-sm-4"
+                        <div class="col"
                             style="background-color:whitesmoke;
                                 height: 150px;margin:6px;padding:20px;border-radius: 10px;">
                             <h4>Total Deposits</h4>
                             <h2 style="color:blue;">UGX: {{ deposits }} </h2>
                         </div>
-                        <div class="col-lg-4 col-md-4 col-sm-4"
+                    </div>
+                    <div class="row" style="margin-top:10px;justify-content: space-evenly;">
+                        <div class="col"
                             style="background-color:whitesmoke;
                                 height:150px;margin:6px;padding:20px;border-radius: 10px;">
                             <h4>Total Users</h4>
                             <h2 style="color:blue;">{{ nousers }}</h2>
+                        </div>
+                        <div class="col"
+                            style="background-color:whitesmoke;
+                                height: 150px;margin:6px;padding:20px;border-radius: 10px;">
+                            <h4>Active users</h4>
+                            <h2 style="color:blue;">{{ active_users }}</h2>
+                        </div>
+                        <div class="col"
+                            style="background-color:whitesmoke;
+                                height:150px;margin:6px;padding:20px;border-radius: 10px;">
+                            <h4>Total Profits</h4>
+                            <h2 style="color:blue;">UGX: {{ profits }}</h2>
                         </div>
                     </div>
                 </div>

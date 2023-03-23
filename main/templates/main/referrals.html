@@ -3,29 +3,29 @@
 {% block content %}
     <section>
         {% include "main/snippets/dashtop.html" with instance=user %}
-        <div class="row">
+        <div style="display:flex;flex-direction:row;">
             {% include "main/snippets/sidepanel.html" %}
             <div class="col col col" style="padding:40px;"
             >
                 <div style="background-color: #DBECF4;
-                    height: 90vh;width:98%;padding: 40px;"
+                    height: 90vh;width:98%;padding: 10px 20px;"
                 >
 
-                    <div style="display:flex;flex-direction:row;justify-content:space-between;">
-                        <h4 style="font-size: 32px;margin-top: 15px;font-weight: bold;">
+                    <div class="jenji">
+                        <h4>
                             My Referrals
                         </h4>
-                        <a style="text-decoration:none;" href="{% url "main:deposit" %}">
+                        <a style="text-decoration:none;" href="{% url "main:dash" %}">
                             <button  style="background-color:#00befa;height: 40px;
                                 border: 2px solid #00befa;border-radius: 8px;color: white;
                             ">
-                                Deposit
+                                Dashboard
                             </button>
                         </a>
 
                     </div>
-                    <div class="row" style="margin-top: 22px;padding:20px 50px;">
-                        <div class="col"
+                    <div class="row" style="margin-top: 22px;padding:20px 20px;">
+                        <div class="col-lg-6 col-md-6 col-sm-6 jago"
                             style="background-color:whitesmoke;padding: 20px;">
                             <h4 style="color:blue;">Direct Referrals</h4>
                             {% if exist %}
@@ -51,7 +51,7 @@
                                 <h7>No direct referrals yet </h7>
                             {% endif %}
                         </div>
-                        <div class="col"
+                        <div class="col-lg-6 col-md-6 col-sm-6 jaga"
                             style="background-color:whitesmoke;padding: 20px;">
                             <h4 style="color:blue;">Indirect Referrals</h4>
                             {% if exist %}

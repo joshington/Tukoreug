@@ -1,0 +1,24 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block content %}
+<section id="top" class="text-center" style="overflow-x:hidden;height: 100%;">
+        <!--title section-->
+        {% include "main/snippets/topbar.html" %}
+            <div class="mine_block">
+                <div class="block_div">
+                    <i class="fa fa-lock fa-3x"  aria-hidden="true">
+                        <h3 style="color:blue;font-weight:bold;">Account Blocked</h3>
+                    </i>
+                    <p>
+                        Ooh sorry, your account was blocked by the Admin, Reach out to The support team
+                    </p>
+                    <span>
+                        <i class="fa fa-envelope fa-2x" aria-hidden="true" style="font-weight:bold;">
+                            support@tukoreug.com
+                        </i>
+                    </span>
+                </div>
+            </div>
+</section>
+{% endblock %}

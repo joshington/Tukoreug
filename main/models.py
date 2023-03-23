@@ -53,12 +53,18 @@ class User(AbstractBaseUser, PermissionsMixin):
     ref_code = models.CharField(max_length=12) #for generating the unique code.
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
+    now_admin = models.BooleanField(default=False)
+    is_blocked = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     last_login = models.DateTimeField(null=True, blank=True)
     date_joined = models.DateTimeField(auto_now_add=True)
     ref_link = models.URLField()
     account_type = models.CharField(max_length=8, choices=Accounts,default="SILVER")
 
+    total_deposits = models.PositiveIntegerField(default=0)
+    total_withdraws = models.PositiveIntegerField(default=0)
+    total_balance = models.PositiveIntegerField(default=0)
+    total_profits = models.PositiveIntegerField(default=0)
 
     USERNAME_FIELD = 'email'
     EMAIL_FIELD = 'email'
@@ -81,7 +87,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             code = generate_ref_code()
             self.ref_code = code
         if not self.ref_link:
-            link = "http://tukore.pythonanywhere.com/referrals/"+str(self.ref_code)
+            link = "https://www.tukoreug.com/referrals/"+str(self.ref_code)
             self.ref_link = link
         super().save()
 
@@ -226,6 +232,16 @@ def create_wallet(sender,instance, created, **kwargs):
          a wallet for every new user instantly
     """
     if created:
+        if instance.now_admin:
+            admin_stats = Stats(
+                balance=0,
+                deposits=0,
+                widthdraws=0,
+                nousers=User.objects.all().exclude(now_admin=True).count(),
+                no_active_users=User.objects.filter(paid=True).count(),
+                profits=0
+            )
+            admin_stats.save()
         try:
             #go ahead and create the wallet
             wallet=Wallet(

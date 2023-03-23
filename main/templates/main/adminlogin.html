@@ -14,17 +14,16 @@
                 </div>
                 <div class="col cola" style="margin-top:40px;">
                     {% for msg  in messages %}
-                        <div class="callout success">
-                            <button class="close-button" aria-label="Close alert" type="button">
-                                <span aria-hidden="true">×</span>
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert"  data-closable>
+                            <strong>{{ msg }}</strong>
+                            <button class="close-button" aria-label="Close alert" type="button" data-close>
+                                <span aria-hidden="true">&times;</span>
                             </button>
-                            <p>
-                                <strong>{{ msg }}</strong>
-                            </p>
                         </div>
                     {% endfor %}
                     <i class="fa fa-lock fa-2x"  aria-hidden="true" style="margin-left:100px;">
-                        Login</i>
+                        Admin  Login
+                    </i>
                     <form  method="POST" style="margin-top: 40px;">
                         {% csrf_token %}
                         {{ form|crispy }}

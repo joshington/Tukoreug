@@ -11,8 +11,17 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os, environ
+from django.urls import reverse_lazy
 
-#====loading the envt variables
+
+
+LOGIN_REDIRECT_URL = reverse_lazy('main:dash')
+LOGOUT_REDIRECT_URL = reverse_lazy('main:login')
+
+LOGIN_URL = reverse_lazy('main:login')
+LOGOUT_URL = reverse_lazy('main:logout')
+
+#====loading the envt variable
 #===Initialize envt variables
 env = environ.Env()
 environ.Env.read_env()
@@ -28,7 +37,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '51*a0xj61@2-t7f-(tzjg+8qhk3%8fxg!^znbgw*42aw_8=oyb'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -44,6 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'crispy_forms',
     'main',
+    'tawkto',
 
 ]
 
@@ -57,6 +67,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     #'responsive.middleware.DeviceInfoMiddleware',
 ]
+
 
 ROOT_URLCONF = 'Tukoreug.urls'
 
@@ -142,11 +153,30 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT =  os.path.join(BASE_DIR, "media")
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static/'),
-]
+if DEBUG:
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, 'static')
+    ]
+else:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+#STATICFILES_DIRS = [
+#    os.path.join(BASE_DIR, 'static/'),
+#]
 
-STATIC_ROOT = '/home/tukore/Tukoreug/static'
+#STATIC_ROOT = '/home/tukore/Tukoreug/static'
+
+EMAIL_USE_TLS = True
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER=env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD=env('EMAIL_HOST_PASSWORD')
+
+EMAIL_PORT=587
+
+EMAIL_BACKEND ='django.core.mail.backends.smtp.EmailBackend'
+
+
+
 
 CACHES = {
     'default':{

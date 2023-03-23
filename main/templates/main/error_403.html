@@ -5,11 +5,11 @@
         {% include "main/snippets/dashtop.html" with instance=obj %}
         <div class="man_404">
             <h2 style="text-align: center;font-size: 70px;font-weight:bold;">
-                500 internal server error
+                403 Error
             </h2>
             <p style="text-align:center;font-size:20px;">
-                Ooh Sorry,server is not responding,
-                Please Check your internet Connection and Try Again
+                Ooh Sorry, Server Encountered some Error, Please try again
+
             </p>
             {% if request.user.is_authenticated %}
                 <a href="{% url 'main:dash' %}">

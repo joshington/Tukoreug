@@ -2,16 +2,16 @@
 {% load static %}
 {% block content %}
 {% load crispy_forms_tags %}
-    <div class="container-fluid">
+    <div>
         {% include "main/snippets/dashtop.html" %}
-        <div class="row">
+        <div>
             {% include "main/snippets/sidepanel.html" %}
-            <div class="col col col" style="padding:40px;"
+            <div  style="padding:40px;"
             >
                 <div style="background-color: #DBECF4;
                     height: 90vh;width:96%;padding: 40px;"
                 >
-                    <div style="display:flex;flex-direction:row;justify-content:space-between;"> 
+                    <div style="display:flex;flex-direction:row;justify-content:space-between;">
                         <i class="fa fa-arrow-left fa-1x">Back</i>
                         <button  style="background-color:#03045e;height: 40px;
                             border: 2px solid #03045e;border-radius: 8px;color: white;
@@ -49,14 +49,9 @@
                             </div>
                         </div>
                     </div>
-                   
-                    
-                   
-                    
-                    
                 </div>
             </div>
         </div>
-    </div>   
+    </div>
 
 {% endblock %}
