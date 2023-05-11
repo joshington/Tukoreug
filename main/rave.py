@@ -20,8 +20,9 @@ CARD_NO = env('CARD_NO')
 
 DEFAULT_ADDRESS = 'bbosalj@gmail.com'
 
-rave = Rave(PUBLIC_KEY, SECRET_KEY, usingEnv = False)
+#rave = Rave(PUBLIC_KEY, SECRET_KEY, usingEnv = False)
 
+rave = Rave(PUBLIC_KEY, SECRET_KEY, usingEnv=False,production=True)
 
 #==getting the ip address currently
 def get_ip_address():
@@ -44,10 +45,8 @@ def format_phone_number(phone_number):
 def make_momo_payment(amount, phonenumber,user,email=DEFAULT_ADDRESS):
     IP=get_ip_address()
     txRef = str(uuid4())
-    payment = Payment(
-        transaction_ref=txRef,amount=amount,user=user
-    )
-    payment.save()
+    #payment = Payment(
+    #    transaction_ref=txRef,amount=amount,user=u
     payload = {
         'amount':amount,
         'email':email,
@@ -58,6 +57,8 @@ def make_momo_payment(amount, phonenumber,user,email=DEFAULT_ADDRESS):
     return payload
 
 def transfer_money_to_phone(phone, amount, username="Unknown User"):
+    IP=get_ip_address()
+
     details = {
         "account_bank":"MPS",
 		"account_number":format_phone_number(phone),
@@ -65,11 +66,13 @@ def transfer_money_to_phone(phone, amount, username="Unknown User"):
 		"narration":"New transfer",
         "currency":"UGX",
         "beneficiary_name":username,
-        "meta":{
-            "sender": "Flutterwave Developers",
-            "sender_country": "UGA",
-            "mobile_number": "256761095710"
-        }
+        "meta":[
+            {
+                "sender": "Flutterwave Developers",
+                "sender_country": "UGA",
+                "mobile_number": "256761095710"
+            }
+        ]
     }
     res = rave.Transfer.initiate(details)
     return res

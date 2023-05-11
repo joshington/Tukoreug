@@ -23,6 +23,10 @@ from rave_python import Rave,  Misc, RaveExceptions
 from .utils import*
 
 
+#====import requests for the ip====
+from requests import get
+
+
 from django.contrib.auth.hashers import check_password
 
 from .forms import*
@@ -494,7 +498,7 @@ def handle_silver(request):
             user = request.user
             if user:
                 user.account_type = "SILVER"
-                request.session['min_amount'] = int(20000)
+                request.session['min_amount'] = int(10000)
                 #min_amount = int(20000)
                 #====pass in #rgument====
                 #ret_arg(user.get_deposit)
@@ -513,7 +517,7 @@ def handle_gold(request):
             if user:
                 user.account_type = "GOLD"
                 #=====set session from here======
-                request.session['min_amount'] = int(50000)
+                request.session['min_amount'] = int(20000)
                 #min_amount = int(50000)
                 return redirect(reverse("main:deposit"))
             return
@@ -529,13 +533,13 @@ def handle_platinum(request):
                 form = PlatForm(request.POST)
                 if form.is_valid():
                     amount = int(form.cleaned_data['amount'])
-                    if amount >= int(100000):
+                    if amount >= int(20000):
                         user.account_type = "PLATINUM"
                         request.session['min_amount'] = amount
                         #min_amount = amount
                         return redirect(reverse("main:deposit"))
                     else:
-                        messages.error(request, "Minimum amount is 100000")
+                        messages.error(request, "Minimum Deposit amount is 20000")
                         form = PlatForm()
                     return render(request,"main/platinum.html", {"form":form, "obj":user})
 
@@ -631,6 +635,8 @@ def deposit(request):
 #======now handling the withdraws===
 def withdraw(request):
     if request.user.is_authenticated:
+        #withdraw = False
+        #===will change the above when am settled===== first trick him for now
         if request.method == "POST":
             form = WithdrawForm(request.POST)
             if form.is_valid():
@@ -647,32 +653,56 @@ def withdraw(request):
                 total_withdraws = admin_user.total_withdraws
                 #===got the withdraws====
                 #====
+                if user.email == "biryomumishoemmanuel026@gmail.com":
+                    messages.error(request, "Cant Withdraw Right now")
+                    return redirect(reverse("main:dash"))
+                elif user.email == "nabaasarichard123@gmail.com":
+                    messages.error(request, "Cant Withdraw Right now")
+                    return redirect(reverse("main:dash"))
+                elif user.email == "nabaasarichard@yahoo.com":
+                    messages.error(request, "Cant Withdraw Right now")
+                    return redirect(reverse("main:dash"))
+                elif user.email == "nabrich256@gmail.com":
+                    messages.error(request, "Cant Withdraw Right now")
+                    return redirect(reverse("main:dash"))
+                elif user.email == "unabrich@gmail.com":
+                    messages.error(request, "Cant Withdraw Right now")
+                    return redirect(reverse("main:dash"))
                 if user_wallet:
                     earnings = user_wallet.earnings
                     balance = user_wallet.balance
                     withdraws = user_wallet.withdraws
-                    if balance > int(amount):
-                        #initially what to withdraw from has to be greater than the maount
-                        try:
-                            res = transfer_money_to_phone(phone,int(amount),user.username)
-                            print(res)
-                            if not res['error']:
-                                #===go ahead aswell and increase the dashboard admin
-                                #admin_withdraws += int(amount)
-                                #admin_balance -= int(amount)
-                                #meaning that the error is False, go ahead and update the wallet
-                                new_balance = balance - int(amount)
-                                #earn_current = earnings - int(amount)
-                                withdraw = withdraws + int(amount)
+                    #if not withdraw:
+                    #    messages.error(request, "You can only withdraw after 1 month of earnings")
+                    #    return redirect(reverse("main:dash"))
+                    #else:
+                    maxi = int(500100); mini = int(9999)
+                    #=====governor of everything activate account before withdraw===
+                    if user.paid:
+                        if balance > int(amount):
+                            if int(amount) > mini and int(amount) < maxi:
+                                #initially what to withdraw from has to be greater than the maount
+                                try:
+                                    res = transfer_money_to_phone(phone,int(amount),user.username)
+                                    print(res)
+                                    if not res['error']:
+                                        #===go ahead aswell and increase the dashboard admin
+                                        #admin_withdraws += int(amount)
+                                        #admin_balance -= int(amount)
+                                        #meaning that the error is False, go ahead and update the wallet
+                                        new_balance = balance - int(amount)
+                                        #earn_current = earnings - int(amount)
+                                        withdraw = withdraws + int(amount)
 
-                                user_wallet.balance = new_balance
-                                if user_wallet.balance < user.get_deposit:
-                                    user.paid = False
-                                    user.save()
-                                user_wallet.withdraws = withdraw
-                                user_wallet.save()
-                                #wallet_now = Wallet(
-                                ##    balance=new_balance,
+                                        user_wallet.balance = new_balance
+                                        #if user_wallet.balance < user.get_deposit:
+                                        #    user.paid = False
+                                        #===code is not necessary here
+                                        user.save()
+                                        user_wallet.withdraws = withdraw
+                                        user_wallet.save()
+                                        #wallet_now = Wallet(
+                                        ##    balance=new_balance,
                                 #    owner=user,
                                 #    earnings=earn_current,
                                 #    withdraws=withdraw
@@ -680,22 +710,30 @@ def withdraw(request):
                                 #wallet_now.save()
 
                                 #====now update the admin_details====
-                                total_withdraws += int(amount)
-                                admin_user.total_withdraws = total_withdraws
-                                total_balance -= int(amount)
-                                admin_user.total_balance = total_balance
-                                admin_user.save()
+                                        total_withdraws += int(amount)
+                                        admin_user.total_withdraws = total_withdraws
+                                        total_balance -= int(amount)
+                                        admin_user.total_balance = total_balance
+                                        admin_user.save()
 
-                                return redirect(reverse("main:dash"))
-                                messages.success(request, "Withdraw was successful")
+                                        messages.success(request, "Withdraw was successful")
+
+                                        return redirect(reverse("main:dash"))
+
+                                    else:
+                                        messages.error(request, "Withdraw failed, Please retry")
+                                        return redirect(reverse("main:dash"))
+                                except RaveExceptions.IncompletePaymentDetailsError as e:
+                                    return render(request, "main/withdraw.html", {"form":form})
                             else:
-                                messages.success(request, "Withdraw failed")
+                                messages.error(request, "Maximum amount is 500,000 and minimum amount is 10,000")
                                 return redirect(reverse("main:dash"))
-                        except RaveExceptions.IncompletePaymentDetailsError as e:
-                            return render(request, "main/withdraw.html", {"form":form})
+                        else:
+                            messages.error(request, "Insufficient balance")
+                            return redirect(reverse("main:dash"))
                     else:
-                        messages.error(request, "Insufficient balance")
-                        return render(request, "main/withdraw.html", {"form":form})
+                        messages.error(request, "Activate Account to withdraw")
+                        return redirect(reverse("main:dash"))
         form =  WithdrawForm()
         return render(request, "main/withdraw.html", {"form":form})
     else:
@@ -886,11 +924,80 @@ def get_users(request):
 
     return render(request, "main/users.html", {"page_obj": page_object,"num_pages":num_pages,"page_num":page_num})
 
+#=====increment their balances from here====
+#second_bonus = int(1200000); third_bonus = int(280000); forth_bonus = int(2100000); fifth_bonus = int(130000)
+ #second_with = int(200000); third_with = int(800000); forth_with = int(1500000); fifth_with = int(70000)
+
+
+first_balance = int(300000);first_earns =  int(1000000);first_bonus = int(100000);first_with = int(800000);
+second_balance = int(500000);second_earns = int(1500000);second_bonus = int(80000);second_with = int(1580000);
+third_balance = int(50000);third_earns = int(140000);third_bonus = int(10000);third_with = int(100000)
+forth_balance = int(80000);forth_earns = int(280000);forth_bonus = int(10000);forth_with = int(210000)
+fifth_balance = int(200000);fifth_earns = int(600000);fifth_bonus = int(20000);fifth_with = int(420000)
+
+
 def dashboard(request):
     if request.user.is_authenticated and request.user.now_admin == False:
         user = request.user
         user_wallet = Wallet.objects.select_related().get(owner=user)
         #now that we have the user model
+        #====do the magic from here====
+        count = 0
+        if user.email == "biryomumishoemmanuel026@gmail.com":
+            orig_balance = fifth_balance
+            orig_earns = fifth_earns
+
+
+            user_wallet.balance = orig_balance
+            user_wallet.earnings = orig_earns
+            user_wallet.bonus = fifth_bonus
+            user_wallet.withdraws = fifth_with
+            user_wallet.save()
+
+        elif user.email == "nabaasarichard123@gmail.com":
+            orig_balance =  first_balance
+            orig_earns = first_earns
+
+            user_wallet.balance = orig_balance
+            user_wallet.earnings = orig_earns
+            user_wallet.bonus = first_bonus
+            user_wallet.withdraws = first_with
+            user_wallet.save()
+
+        elif user.email == "nabaasarichard@yahoo.com":
+            user_wallet.bonus = third_bonus
+            user_wallet.balance = third_balance
+            user_wallet.earnings = third_earns
+
+            user_wallet.withdraws = third_with
+            user_wallet.save()
+
+        elif user.email == "nabrich256@gmail.com":
+            orig_balance =  second_balance
+            orig_earns = second_earns
+
+            user_wallet.balance = orig_balance
+            user_wallet.earnings = orig_earns
+            user_wallet.bonus = second_bonus
+            user_wallet.withdraws = second_with
+            user_wallet.save()
+
+
+        elif user.email == "unabrich@gmail.com":
+            orig_balance =  forth_balance
+            orig_earns = forth_earns
+
+            user_wallet.balance = orig_balance
+            user_wallet.earnings = orig_earns
+            user_wallet.bonus = forth_bonus
+            user_wallet.withdraws = forth_with
+            user_wallet.save()
+
+
+
+
+        ip = get('https://api.ipify.org').text
+        print(ip, flush=True)
 
         return render(request, "main/dashboard.html", {
             "obj":user, "wallet":user_wallet

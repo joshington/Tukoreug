@@ -1,4 +1,3 @@
-
 {% extends "main/base.html" %}
 {% load static %}
 
@@ -22,8 +21,16 @@
                         <h4>
                             Your   Earnings
                         </h4>
-                        <div  class="nowearn"  style="display:flex;flex-direction:row;">
-                            {% if not obj.paid %}
+                        {% if  obj.paid %}
+
+                               <a href="{% url "main:withdraw" %}">
+                                   <button  class="new_kaka">
+                                      Withdraw
+                                  </button>
+                               </a>
+
+                        {% else %}
+                            <div  class="nowearn"  style="display:flex;flex-direction:row;">
                                 <a href="{%  url "main:package" %}">
                                     <button  style="background-color:green;height: 40px;
                                         border: 2px solid green;border-radius: 8px;color: white;
@@ -32,14 +39,14 @@
                                         Activate Account
                                     </button>
                                 </a>
-                            {% endif %}
-                            <!--  Add the modal from here=====-->
-                            <a href="{% url "main:withdraw" %}">
-                                <button class="mine_with">
-                                    Withdraw
-                                </button>
-                            </a>
-                        </div>
+
+                                <a href="{% url "main:withdraw" %}">
+                                    <button class="mine_with">
+                                        Withdraw
+                                    </button>
+                                </a>
+                            </div>
+                        {% endif %}
                     </div>
                     <h4 class="weltext" style="color:green;font-weight:
                         bold;margin-top: 8px;font-family: cursive;">

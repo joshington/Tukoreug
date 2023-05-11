@@ -92,6 +92,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         super().save()
 
 
+
+    #=====decoarator to check if the user is activated===
+    @property
+    def activated(self):
+        if self.paid:return True
+        else:return False
+
     #===define a decorator here to return the deposit amount baing on the package
     @property
     def get_deposit(self):

@@ -104,7 +104,7 @@ class WithdrawForm(forms.Form):
         )
     )
     amount = forms.CharField(
-        widget=forms.TextInput(attrs={'placeholder':'Amount e.g 50000','style':'width:300px'})
+        widget=forms.TextInput(attrs={'placeholder':'Amount between 10,000 and 500,100','style':'width:300px'})
     )
 
 class PlatForm(forms.Form):
